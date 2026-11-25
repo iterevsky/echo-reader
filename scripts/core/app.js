@@ -139,6 +139,7 @@ import { createReaderScreen } from '../screens/reader.js';
     if (phase !== 'title-visible') return;
 
     phase = 'preparing-destination';
+    splash.querySelector('.splash__tap-hint')?.setAttribute('hidden', '');
     clearTimers();
     tapButton.disabled = true;
 

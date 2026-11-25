@@ -282,6 +282,7 @@ export function createReaderScreen(root, { onBack, onCurrentChapterChanged }) {
 
     savePosition();
     settingsOpen = true;
+    root.classList.add('settings-preview');
     previousFocusedElement = document.activeElement;
     hideControls();
     settingsBackdrop.classList.add('is-open');
@@ -289,19 +290,20 @@ export function createReaderScreen(root, { onBack, onCurrentChapterChanged }) {
     applyReaderSettings(getState().readerSettings);
 
     const firstInput = settingInputs[0];
-    firstInput?.focus();
+    firstInput?.focus({ preventScroll: true });
   }
 
   function closeSettings() {
     if (!settingsOpen) return;
 
     settingsOpen = false;
+    root.classList.remove('settings-preview');
     settingsBackdrop.classList.remove('is-open');
     settingsBackdrop.setAttribute('aria-hidden', 'true');
     savePosition();
 
     if (previousFocusedElement instanceof HTMLElement) {
-      previousFocusedElement.focus();
+      previousFocusedElement.focus({ preventScroll: true });
     }
     previousFocusedElement = null;
   }
@@ -473,20 +475,24 @@ export function createReaderScreen(root, { onBack, onCurrentChapterChanged }) {
     }
   }
 
+  function applyLiveSettings(update) {
+    const atTop = scrollArea.scrollTop <= 1;
+    const anchor = captureReadingAnchor() || lastKnownAnchor;
+    const updated = update();
+    applyReaderSettings(updated.readerSettings);
+    // Restore synchronously after the new layout is calculated, so rapid input
+    // events cannot queue stale reading positions or visibly jump the text.
+    if (atTop) scrollArea.scrollTop = 0;
+    else if (anchor) restoreReadingAnchor(anchor);
+    lastKnownAnchor = captureReadingAnchor() || anchor;
+    savePosition();
+  }
+
   function handleSettingChange(input) {
     const key = input.dataset.setting;
     const value = Number(input.value);
     if (!Number.isFinite(value)) return;
-
-    const anchor = captureReadingAnchor() || lastKnownAnchor;
-    const updated = updateReaderSettings({ [key]: value });
-    applyReaderSettings(updated.readerSettings);
-
-    requestAnimationFrame(() => {
-      if (anchor) restoreReadingAnchor(anchor);
-      lastKnownAnchor = captureReadingAnchor() || anchor;
-      savePosition();
-    });
+    applyLiveSettings(() => updateReaderSettings({ [key]: value }));
   }
 
   backButton.addEventListener('click', () => {
@@ -506,33 +512,16 @@ export function createReaderScreen(root, { onBack, onCurrentChapterChanged }) {
   });
 
   settingsResetButton.addEventListener('click', () => {
-    const anchor = captureReadingAnchor() || lastKnownAnchor;
-    const updated = resetReaderSettings();
-    applyReaderSettings(updated.readerSettings);
-
-    requestAnimationFrame(() => {
-      if (anchor) restoreReadingAnchor(anchor);
-      lastKnownAnchor = captureReadingAnchor() || anchor;
-      savePosition();
-    });
+    applyLiveSettings(resetReaderSettings);
   });
 
   settingInputs.forEach((input) => {
     input.addEventListener('input', () => handleSettingChange(input));
-    input.addEventListener('change', () => handleSettingChange(input));
   });
 
   alignmentButtons.forEach((button) => {
     button.addEventListener('click', () => {
-      const anchor = captureReadingAnchor() || lastKnownAnchor;
-      const updated = updateReaderSettings({ alignment: button.dataset.alignment });
-      applyReaderSettings(updated.readerSettings);
-
-      requestAnimationFrame(() => {
-        if (anchor) restoreReadingAnchor(anchor);
-        lastKnownAnchor = captureReadingAnchor() || anchor;
-        savePosition();
-      });
+      applyLiveSettings(() => updateReaderSettings({ alignment: button.dataset.alignment }));
     });
   });
 

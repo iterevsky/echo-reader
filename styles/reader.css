@@ -490,3 +490,65 @@
     transition-duration: 0.01ms;
   }
 }
+
+/* Live reading settings: keep the current chapter visible above the sheet. */
+.reader-settings-backdrop {
+  align-items: flex-end;
+  padding: 0;
+  background: transparent;
+}
+.reader-settings {
+  width: min(100%, 650px);
+  max-height: 48vh;
+  max-height: 48dvh;
+  border-radius: 8px 8px 0 0;
+  box-shadow: 0 -12px 36px rgba(0, 0, 0, .28);
+}
+.reader-settings__header { padding: 10px 20px; align-items: center; }
+.reader-settings__eyebrow { display: none; }
+.reader-settings__header h2 { font-size: 21px; }
+.reader-settings__body { min-height: 0; padding: 0 20px 8px; overscroll-behavior: contain; }
+.reader-setting { margin: 12px 0 15px; }
+.reader-setting__top { margin-bottom: 6px; }
+.reader-settings__footer { padding: 8px 20px max(8px, env(safe-area-inset-bottom)); }
+@media (min-width: 760px) {
+  .reader-settings__body { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 0 24px; }
+}
+.reader-screen.settings-preview .reader-footer { visibility: hidden; }
+
+/* Two independent, delayed ripple hints, one for each splash stage. */
+.splash__tap-hint {
+  position: absolute;
+  z-index: 20;
+  left: 50%;
+  bottom: max(9%, calc(env(safe-area-inset-bottom) + 32px));
+  width: 32px;
+  height: 32px;
+  margin-left: -16px;
+  border: 1px solid rgba(255, 247, 231, .86);
+  border-radius: 50%;
+  box-shadow: 0 0 12px rgba(0,0,0,.35);
+  pointer-events: none;
+  opacity: 0;
+}
+.splash[data-phase="waiting"] .splash__tap-hint { animation: echo-hint-wait 2.4s 3s infinite; }
+.splash[data-phase="title-visible"] .splash__tap-hint { animation: echo-hint-title 2.4s 3s infinite; }
+@keyframes echo-hint-wait {
+  0% { opacity: 0; transform: scale(.62); }
+  25% { opacity: .85; }
+  75%, 100% { opacity: 0; transform: scale(1.6); }
+}
+@keyframes echo-hint-title {
+  0% { opacity: 0; transform: scale(.62); }
+  25% { opacity: .85; }
+  75%, 100% { opacity: 0; transform: scale(1.6); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .splash[data-phase="waiting"] .splash__tap-hint,
+  .splash[data-phase="title-visible"] .splash__tap-hint {
+    animation: echo-hint-static .01s 3s forwards;
+  }
+  @keyframes echo-hint-static { to { opacity: .75; } }
+}
+
+.splash__tap-hint[hidden] { display: none !important; }
