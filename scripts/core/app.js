@@ -23,16 +23,104 @@ import { createReaderScreen } from '../screens/reader.js';
   let transitionTimer = null;
   let catalogPromise = null;
   let offlineManagerStarted = false;
+  let pendingShellBuild = null;
+  let shellReloading = false;
+  let openingChapter = false;
+  const SHELL_BUILD = document.querySelector('meta[name="echo-build"]')?.content;
+  const SHELL_RESUME_KEY = "echo-shell-resume-v1";
+  const SHELL_RELOAD_KEY = "echo-shell-reload-v1";
+  let shellResume = null;
+  try {
+    shellResume = JSON.parse(sessionStorage.getItem(SHELL_RESUME_KEY) || "null");
+    sessionStorage.removeItem(SHELL_RESUME_KEY);
+    if (shellResume?.build !== SHELL_BUILD || Date.now() - shellResume.time > 120000) shellResume = null;
+  } catch { shellResume = null; }
   const pendingActivationPromise = activatePendingContentVersion();
 
-  // Регистрация не блокирует заставку. Первый запуск worker-кэша происходит в фоне.
-  registerServiceWorker().catch((error) => {
-    console.warn('ЭХО: регистрация офлайн-режима не удалась.', error);
-  });
+  // Регистрация не блокирует заставку. Обновление UI и обновление текста независимы.
+  const registrationPromise = registerServiceWorker();
+  let checkInProgress = null;
+  let lastUpdateCheck = 0;
+
+  function applyShellUpdateIfSafe() {
+    if (!pendingShellBuild || shellReloading || openingChapter || document.visibilityState !== 'visible') return;
+    if (readerRoot.classList.contains('is-active')) return;
+    const onSplash = !splash.hidden && (phase === 'waiting' || phase === 'title-visible');
+    const onContents = splash.hidden && contentsRoot.classList.contains('is-active');
+    if (!onSplash && !onContents) return;
+    try {
+      const guard = JSON.parse(sessionStorage.getItem(SHELL_RELOAD_KEY) || 'null');
+      // Защита от циклической перезагрузки при рассинхронизации CDN.
+      if (guard?.build === pendingShellBuild && Date.now() - guard.time < 120000) return;
+      const time = Date.now();
+      sessionStorage.setItem(SHELL_RELOAD_KEY, JSON.stringify({ build: pendingShellBuild, time }));
+      sessionStorage.setItem(SHELL_RESUME_KEY, JSON.stringify({
+        build: pendingShellBuild, time, screen: onContents ? 'contents' : phase
+      }));
+    } catch {
+      // Если браузер запретил sessionStorage, не рискуем циклическим обновлением.
+      return;
+    }
+    shellReloading = true;
+    window.location.reload();
+  }
+
+  async function inspectController() {
+    const controller = navigator.serviceWorker?.controller;
+    if (!controller || !SHELL_BUILD) return;
+    const build = await new Promise((resolve) => {
+      const channel = new MessageChannel();
+      const finish = (value) => {
+        window.clearTimeout(timer);
+        channel.port1.close();
+        resolve(value);
+      };
+      const timer = window.setTimeout(() => finish(null), 1500);
+      channel.port1.onmessage = (event) => finish(event.data?.build || null);
+      try { controller.postMessage({ type: 'ECHO_GET_BUILD' }, [channel.port2]); }
+      catch { finish(null); }
+    });
+    if (navigator.serviceWorker.controller !== controller) return;
+    if (build && build !== SHELL_BUILD) pendingShellBuild = build;
+    else if (build === SHELL_BUILD) pendingShellBuild = null;
+    applyShellUpdateIfSafe();
+  }
+
+  function checkShellUpdate(force = false) {
+    if (!('serviceWorker' in navigator) || document.visibilityState !== 'visible') return;
+    // Возврат из фона проверяем сразу, частые focus-события объединяем.
+    if (checkInProgress) return checkInProgress;
+    if (!force && Date.now() - lastUpdateCheck < 10000) {
+      return inspectController().catch(() => {});
+    }
+    lastUpdateCheck = Date.now();
+    checkInProgress = (async () => {
+      const registration = await registrationPromise;
+      if (registration && navigator.onLine !== false) {
+        await registration.update().catch(() => {});
+      }
+      await inspectController();
+    })().catch(() => {}).finally(() => { checkInProgress = null; });
+    return checkInProgress;
+  }
+
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.addEventListener('controllerchange', () => {
+      inspectController().catch(() => {});
+    });
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'visible') checkShellUpdate(true);
+    });
+    window.addEventListener('pageshow', (event) => checkShellUpdate(event.persisted));
+    window.addEventListener('focus', () => checkShellUpdate());
+    window.addEventListener('online', () => checkShellUpdate(true));
+    window.setInterval(() => checkShellUpdate(), 5 * 60 * 1000);
+  }
 
   let reader;
 
   const contents = createContentsScreen(contentsRoot, async (chapter) => {
+    openingChapter = true;
     try {
       contents.hide();
       await reader.openChapter(chapter, { restorePosition: true });
@@ -41,11 +129,17 @@ import { createReaderScreen } from '../screens/reader.js';
       contents.show();
       console.error('ЭХО: не удалось открыть главу.', error);
       window.alert(`Не удалось открыть главу ${chapter.number}.\n${error.message}`);
+    } finally {
+      openingChapter = false;
+      applyShellUpdateIfSafe();
     }
   });
 
   reader = createReaderScreen(readerRoot, {
-    onBack: () => contents.show(),
+    onBack: () => {
+      contents.show();
+      applyShellUpdateIfSafe();
+    },
     onCurrentChapterChanged: () => contents.refreshState()
   });
 
@@ -163,6 +257,7 @@ import { createReaderScreen } from '../screens/reader.js';
       splash.inert = true;
       transitionTimer = null;
       phase = readerRoot.classList.contains('is-active') ? 'reading' : 'contents';
+      applyShellUpdateIfSafe();
     }, 1850);
   }
 
@@ -178,6 +273,21 @@ import { createReaderScreen } from '../screens/reader.js';
   }
 
   tapButton.addEventListener('click', handleSplashTap);
+
+  // Возвращаем экран, на котором была безопасно применена новая оболочка.
+  if (shellResume?.screen === 'title-visible') {
+    showTitle();
+  } else if (shellResume?.screen === 'contents') {
+    phase = 'preparing-destination';
+    ensureCatalog().then(() => {
+      contents.show();
+      splash.hidden = true;
+      splash.inert = true;
+      phase = 'contents';
+      applyShellUpdateIfSafe();
+    }).catch(() => { phase = 'waiting'; });
+  }
+  checkShellUpdate(true);
 
   const splashImage = document.querySelector('.splash__image');
   splashImage?.addEventListener('error', () => {

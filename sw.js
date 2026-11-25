@@ -1,5 +1,5 @@
 /* ЭХО: Service Worker. BUILD_ID меняется при выпуске обновления оболочки. */
-const BUILD_ID = 'echo-shell-2026-11-25-v2';
+const BUILD_ID = 'echo-shell-2026-11-25-v3';
 const SHELL_CACHE = `echo-shell-${BUILD_ID}`;
 const META_CACHE = 'echo-meta-v1';
 const BOOTSTRAP_CACHE = 'echo-content-bootstrap-v1';
@@ -157,6 +157,8 @@ self.addEventListener('install', (event) => {
     const cache = await caches.open(SHELL_CACHE);
     const requests = coreFiles.map((file) => new Request(url(file), { cache: 'reload' }));
     await cache.addAll(requests);
+    // После полной загрузки оболочки не ждём закрытия всех вкладок.
+    await self.skipWaiting();
   })());
 });
 
@@ -174,6 +176,13 @@ self.addEventListener('activate', (event) => {
       .map((key) => caches.delete(key)));
     await self.clients.claim();
   })());
+});
+
+// Страница сверяет версию контроллера со своей версией перед безопасным обновлением.
+self.addEventListener('message', (event) => {
+  if (event.data?.type === 'ECHO_GET_BUILD' && event.ports[0]) {
+    event.ports[0].postMessage({ build: BUILD_ID });
+  }
 });
 
 self.addEventListener('fetch', (event) => {
