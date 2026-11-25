@@ -1,0 +1,30 @@
+.offline-status {
+  flex: 0 0 auto;
+  min-height: 30px;
+  padding: 7px 2px max(8px, env(safe-area-inset-bottom));
+  color: #81786f;
+  font-family: Arial, sans-serif;
+  font-size: 10px;
+  line-height: 1.45;
+  letter-spacing: 0.025em;
+  text-align: center;
+  transition: color 180ms ease;
+}
+
+.offline-status[hidden] {
+  display: none;
+}
+
+.offline-status[data-state="ready"] {
+  color: #9b9a83;
+}
+
+.offline-status[data-state="warning"] {
+  color: #b59b82;
+}
+
+@media (max-width: 560px) {
+  .offline-status {
+    font-size: 9px;
+  }
+}

@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#111111">
+  <meta name="description" content="ЭХО. Интерактивное книжное издание.">
+  <link rel="manifest" href="./manifest.webmanifest">
+
+  <title>ЭХО</title>
+
+  <link rel="stylesheet" href="./styles/base.css">
+  <link rel="stylesheet" href="./styles/contents.css">
+  <link rel="stylesheet" href="./styles/reader.css">
+  <link rel="stylesheet" href="./styles/offline.css">
+
+  <script type="module" src="./scripts/core/app.js"></script>
+</head>
+<body>
+  <main id="app">
+    <!-- Заставка -->
+    <section
+      class="splash"
+      data-splash
+      data-phase="waiting"
+      data-idle="0"
+      aria-label="Заставка книги ЭХО"
+    >
+      <div class="splash__photo">
+        <img
+          class="splash__image"
+          src="./assets/images/splash-original.png"
+          alt=""
+          draggable="false"
+          fetchpriority="high"
+        >
+      </div>
+
+      <div class="splash__shade" aria-hidden="true"></div>
+
+      <div class="splash__title" aria-hidden="true">
+        <h1>ЭХО</h1>
+      </div>
+
+      <button
+        class="splash__tap-zone"
+        type="button"
+        data-splash-action
+        aria-label="Показать название книги"
+      ></button>
+    </section>
+
+    <!-- Настоящее оглавление -->
+    <section
+      class="contents-screen"
+      id="contents-screen"
+      aria-hidden="true"
+      inert
+    >
+      <div class="contents-shell">
+        <header class="contents-header">
+          <div class="contents-heading">
+            <p class="contents-eyebrow">ЭХО</p>
+            <h1>Содержание</h1>
+          </div>
+
+          <div class="density-control" role="group" aria-label="Плотность списка">
+            <button type="button" data-density="compact" aria-pressed="false">Компактно</button>
+            <button type="button" data-density="normal" aria-pressed="true">Обычно</button>
+            <button type="button" data-density="spacious" aria-pressed="false">Просторно</button>
+          </div>
+        </header>
+
+        <nav class="contents-ranges" aria-label="Быстрый переход по главам" data-range-nav></nav>
+
+        <div class="contents-scroll" id="contents-scroll" tabindex="0">
+          <div class="contents-loading" data-contents-loading>Загружаем содержание…</div>
+          <ol class="chapter-list" id="chapter-list"></ol>
+        </div>
+        <p class="offline-status" data-offline-status role="status" aria-live="polite" hidden></p>
+      </div>
+    </section>
+
+    <!-- Экран чтения: первая рабочая версия -->
+    <section
+      class="reader-screen"
+      id="reader-screen"
+      aria-hidden="true"
+      inert
+    >
+      <div class="reader-toolbar" data-reader-toolbar>
+        <button class="reader-contents-button" type="button" data-reader-back>
+          <span aria-hidden="true">‹</span>
+          Оглавление
+        </button>
+        <button class="reader-settings-button" type="button" data-reader-settings>
+          Настройки чтения
+        </button>
+      </div>
+
+      <div class="reader-scroll" id="reader-scroll" tabindex="0">
+        <article class="reader-article">
+          <header class="reader-chapter-heading">
+            <p class="reader-chapter-number" id="reader-chapter-number"></p>
+            <h1 id="reader-chapter-title"></h1>
+          </header>
+          <div class="reader-text" id="reader-text"></div>
+          <p class="reader-end-note" aria-hidden="true">· · ·</p>
+        </article>
+      </div>
+
+      <footer class="reader-footer">
+        <button type="button" data-reader-previous disabled>Предыдущая</button>
+        <button type="button" data-reader-next disabled>Следующая</button>
+      </footer>
+
+      <div class="reader-transition" data-reader-transition aria-hidden="true">
+        <p class="reader-transition__direction" data-transition-direction></p>
+        <h2 data-transition-title></h2>
+      </div>
+
+      <div class="reader-settings-backdrop" data-settings-backdrop aria-hidden="true">
+        <section class="reader-settings" role="dialog" aria-modal="true" aria-labelledby="reader-settings-title">
+          <header class="reader-settings__header">
+            <div>
+              <p class="reader-settings__eyebrow">ЭХО</p>
+              <h2 id="reader-settings-title">Настройки чтения</h2>
+            </div>
+            <button class="reader-settings__close" type="button" data-settings-close aria-label="Закрыть настройки">×</button>
+          </header>
+
+          <div class="reader-settings__body">
+            <label class="reader-setting" for="setting-font-size">
+              <span class="reader-setting__top"><span>Размер шрифта</span><output data-setting-value="fontSize">19</output></span>
+              <input id="setting-font-size" type="range" min="16" max="30" step="1" data-setting="fontSize">
+            </label>
+
+            <label class="reader-setting" for="setting-line-height">
+              <span class="reader-setting__top"><span>Межстрочный интервал</span><output data-setting-value="lineHeight">1,72</output></span>
+              <input id="setting-line-height" type="range" min="1.4" max="2.2" step="0.05" data-setting="lineHeight">
+            </label>
+
+            <label class="reader-setting" for="setting-paragraph-spacing">
+              <span class="reader-setting__top"><span>Расстояние между абзацами</span><output data-setting-value="paragraphSpacing">1,08</output></span>
+              <input id="setting-paragraph-spacing" type="range" min="0.5" max="1.8" step="0.05" data-setting="paragraphSpacing">
+            </label>
+
+            <label class="reader-setting" for="setting-page-margin">
+              <span class="reader-setting__top"><span>Поля страницы</span><output data-setting-value="pageMargin">26</output></span>
+              <input id="setting-page-margin" type="range" min="14" max="56" step="2" data-setting="pageMargin">
+            </label>
+
+            <label class="reader-setting" for="setting-text-width">
+              <span class="reader-setting__top"><span>Ширина текстовой полосы</span><output data-setting-value="textWidth">690</output></span>
+              <input id="setting-text-width" type="range" min="520" max="900" step="20" data-setting="textWidth">
+            </label>
+
+            <fieldset class="reader-setting reader-setting--alignment">
+              <legend>Выравнивание текста</legend>
+              <div class="reader-alignment-control">
+                <button type="button" data-alignment="left" aria-pressed="true">По левому краю</button>
+                <button type="button" data-alignment="justify" aria-pressed="false">По ширине</button>
+              </div>
+            </fieldset>
+          </div>
+
+          <footer class="reader-settings__footer">
+            <button type="button" class="reader-settings__reset" data-settings-reset>Сбросить настройки</button>
+            <button type="button" class="reader-settings__done" data-settings-close>Готово</button>
+          </footer>
+        </section>
+      </div>
+    </section>
+  </main>
+</body>
+</html>

@@ -1,0 +1,611 @@
+{
+  "schemaVersion": 1,
+  "contentVersion": "3f2c24de1d3debdd2c90",
+  "catalogSha256": "66b1ed8cd25e857d1fb4c1236291688fe297a602f842b45b22c265dcc37e6e70",
+  "chapterCount": 86,
+  "totalBytes": 1118470,
+  "chapters": [
+    {
+      "id": "chapter-001",
+      "number": 1,
+      "file": "data/chapters/001.html",
+      "sha256": "47a5f9001160f1bc39bf4bdbdd00ef210cbf70695abde6d6d60351ba14c0051f",
+      "bytes": 10946
+    },
+    {
+      "id": "chapter-002",
+      "number": 2,
+      "file": "data/chapters/002.html",
+      "sha256": "5a9c68699dceaf0e69419a09eb67325805e535af6321b9cc5d60044d79e93c3e",
+      "bytes": 2834
+    },
+    {
+      "id": "chapter-003",
+      "number": 3,
+      "file": "data/chapters/003.html",
+      "sha256": "9ca1dd3bdaa1bbb4977e9865f7cd2152ad4261eaa87ee04fd1bf6add6f8caf15",
+      "bytes": 3525
+    },
+    {
+      "id": "chapter-004",
+      "number": 4,
+      "file": "data/chapters/004.html",
+      "sha256": "f3ce6e99edd511c400c0237730505ddaaa462f33273f36b9a70ed4f81df772e0",
+      "bytes": 3842
+    },
+    {
+      "id": "chapter-005",
+      "number": 5,
+      "file": "data/chapters/005.html",
+      "sha256": "74ab6379ddfc520f0dc7f8477057acdb402a4864dae7d250daab18423c2e1f6b",
+      "bytes": 6364
+    },
+    {
+      "id": "chapter-006",
+      "number": 6,
+      "file": "data/chapters/006.html",
+      "sha256": "6401cb97b78cb75512f40620ea2d52b3fcf47456c4e5376772285cbd204e3b65",
+      "bytes": 3622
+    },
+    {
+      "id": "chapter-007",
+      "number": 7,
+      "file": "data/chapters/007.html",
+      "sha256": "6716ef3cbce8dbf0b725435db42105ca8f06b3c6fa8bacb0ffcafe15f867525d",
+      "bytes": 5218
+    },
+    {
+      "id": "chapter-008",
+      "number": 8,
+      "file": "data/chapters/008.html",
+      "sha256": "f1a05c8a22f529c838b54a58b9aec9d72e9fdf9813d60432df878e83900bf65d",
+      "bytes": 3110
+    },
+    {
+      "id": "chapter-009",
+      "number": 9,
+      "file": "data/chapters/009.html",
+      "sha256": "ede31b153965f33bfc04df3369d0c1a0f11006fa589e792d25c568975385a3a3",
+      "bytes": 2760
+    },
+    {
+      "id": "chapter-010",
+      "number": 10,
+      "file": "data/chapters/010.html",
+      "sha256": "699e36c6fd02d3f8d7797de38d04cc252b8a1099365a14980ede87fe61bbba9a",
+      "bytes": 2694
+    },
+    {
+      "id": "chapter-011",
+      "number": 11,
+      "file": "data/chapters/011.html",
+      "sha256": "8a21a600eefc672acb4b0cca5e9a8b34d9adfdc2647601bbb858625032cf1d57",
+      "bytes": 2931
+    },
+    {
+      "id": "chapter-012",
+      "number": 12,
+      "file": "data/chapters/012.html",
+      "sha256": "86988aaeefc9b6eb5cbe63387f7b82a6c57bbeeb2310ec6f57c397e26b4565c5",
+      "bytes": 7828
+    },
+    {
+      "id": "chapter-013",
+      "number": 13,
+      "file": "data/chapters/013.html",
+      "sha256": "215a5d7d8d402e1a6552494478283296b094b6b39cfad098f45fccb9b8a98ff8",
+      "bytes": 9498
+    },
+    {
+      "id": "chapter-014",
+      "number": 14,
+      "file": "data/chapters/014.html",
+      "sha256": "b703b9c60fc0a213ba0e78590e668acad2ec64543c7c0ed743ac2d89588118f4",
+      "bytes": 7151
+    },
+    {
+      "id": "chapter-015",
+      "number": 15,
+      "file": "data/chapters/015.html",
+      "sha256": "90832e3a578e4161c5322e7ce0f02484f2b0c60dd37d5ca72aaa1a459874fb93",
+      "bytes": 9413
+    },
+    {
+      "id": "chapter-016",
+      "number": 16,
+      "file": "data/chapters/016.html",
+      "sha256": "35aefa4668dc76b07c8cff6956be4d3841f219752021e27174c5fa06c8e50489",
+      "bytes": 11990
+    },
+    {
+      "id": "chapter-017",
+      "number": 17,
+      "file": "data/chapters/017.html",
+      "sha256": "001afe8eab4c14566afd55e7c3fc97c56c8c032546fad9cd54f095af861360bd",
+      "bytes": 4866
+    },
+    {
+      "id": "chapter-018",
+      "number": 18,
+      "file": "data/chapters/018.html",
+      "sha256": "111f11b31db5754274ea094d24cda779e702f7ddf8387a5d581cf5140c42b868",
+      "bytes": 16403
+    },
+    {
+      "id": "chapter-019",
+      "number": 19,
+      "file": "data/chapters/019.html",
+      "sha256": "e7c1b92c78d3ae7cae6dad0bc2d9c5887cb2a21ae8e644eaa89aaf378a77241a",
+      "bytes": 4975
+    },
+    {
+      "id": "chapter-020",
+      "number": 20,
+      "file": "data/chapters/020.html",
+      "sha256": "0ae6a931e39a1b5a6e60c24d5c504dcb1fa019ea4ac41a64fe5fae9699ef7577",
+      "bytes": 9998
+    },
+    {
+      "id": "chapter-021",
+      "number": 21,
+      "file": "data/chapters/021.html",
+      "sha256": "fc3cb1e9a4afb03afc4f65acd7a20eceeb04e60ce241fa721ac9e560bb6b8fe7",
+      "bytes": 18285
+    },
+    {
+      "id": "chapter-022",
+      "number": 22,
+      "file": "data/chapters/022.html",
+      "sha256": "c45472e008d83e7800046d89e9b602745c9b5045d3b7fb0df3386c106bc4b2b9",
+      "bytes": 7353
+    },
+    {
+      "id": "chapter-023",
+      "number": 23,
+      "file": "data/chapters/023.html",
+      "sha256": "14828f5c325aaceedae4cfa37fae99fb76029bcc7647bc8b9fe0f84688549cea",
+      "bytes": 10258
+    },
+    {
+      "id": "chapter-024",
+      "number": 24,
+      "file": "data/chapters/024.html",
+      "sha256": "55aa8acc2cd8e3649a30840125c977d83224d7010ed3bfd0e65efe4c0c5cdbb3",
+      "bytes": 17814
+    },
+    {
+      "id": "chapter-025",
+      "number": 25,
+      "file": "data/chapters/025.html",
+      "sha256": "d491787ab5cbb2dd47bcd8f89bab425d17bedf28508bba279e96fbd40316c12b",
+      "bytes": 11045
+    },
+    {
+      "id": "chapter-026",
+      "number": 26,
+      "file": "data/chapters/026.html",
+      "sha256": "3a43711019229230eccbb0b06f5f9e80bc90227e00c3503d3d6a41c62f3dc1a8",
+      "bytes": 12711
+    },
+    {
+      "id": "chapter-027",
+      "number": 27,
+      "file": "data/chapters/027.html",
+      "sha256": "900550edaff3c5c712335217e370f3807e3869ae0ebcba552bac2dc320d8f8df",
+      "bytes": 9399
+    },
+    {
+      "id": "chapter-028",
+      "number": 28,
+      "file": "data/chapters/028.html",
+      "sha256": "8b3eb81d8432f32c10de565ee8d4aaff3f24df005c50a5b1770a430edee8e784",
+      "bytes": 11239
+    },
+    {
+      "id": "chapter-029",
+      "number": 29,
+      "file": "data/chapters/029.html",
+      "sha256": "d960df932006281a848dd5d562ce5c82810b4872452281c32ff42263614a6e9d",
+      "bytes": 12422
+    },
+    {
+      "id": "chapter-030",
+      "number": 30,
+      "file": "data/chapters/030.html",
+      "sha256": "e597adae1412f288bea32d00353179a48b8c8799beee6cdf9fcdd4cab9e63314",
+      "bytes": 14525
+    },
+    {
+      "id": "chapter-031",
+      "number": 31,
+      "file": "data/chapters/031.html",
+      "sha256": "80d43dfaeae2d498c1fd06f17e3d966e07229700f298d5010cb22d1649d32ad2",
+      "bytes": 6600
+    },
+    {
+      "id": "chapter-032",
+      "number": 32,
+      "file": "data/chapters/032.html",
+      "sha256": "38db87e3cacdd5bafc7d05bf081e6c77b4baca616538b867a42ab2019b632007",
+      "bytes": 10786
+    },
+    {
+      "id": "chapter-033",
+      "number": 33,
+      "file": "data/chapters/033.html",
+      "sha256": "6983c8400372e8834c8770407edbec6d9b82ef2ef2f2b0ad33f23dabdaceed3d",
+      "bytes": 17261
+    },
+    {
+      "id": "chapter-034",
+      "number": 34,
+      "file": "data/chapters/034.html",
+      "sha256": "79a749f96fcea50525bc89c70603449aa83afdb093eac0729334e37e12dbb848",
+      "bytes": 23083
+    },
+    {
+      "id": "chapter-035",
+      "number": 35,
+      "file": "data/chapters/035.html",
+      "sha256": "83b547a265265408e7283414b1b34ca391e8e8812d5024443dba6dae394c5a47",
+      "bytes": 21785
+    },
+    {
+      "id": "chapter-036",
+      "number": 36,
+      "file": "data/chapters/036.html",
+      "sha256": "acf9b45ed7a5a75ca04bf2e259109d80fb5a0d2381050a3297e2a20f34496279",
+      "bytes": 7791
+    },
+    {
+      "id": "chapter-037",
+      "number": 37,
+      "file": "data/chapters/037.html",
+      "sha256": "13a12949c2ed00eeb664285a34ea9b7db8be37a741d7f55de7646b21ecaa2b1e",
+      "bytes": 17498
+    },
+    {
+      "id": "chapter-038",
+      "number": 38,
+      "file": "data/chapters/038.html",
+      "sha256": "0795e72b8e9d0eceb6de5cd017f7fed4ca02b502b176a24bb8bba763dfb1e96f",
+      "bytes": 12282
+    },
+    {
+      "id": "chapter-039",
+      "number": 39,
+      "file": "data/chapters/039.html",
+      "sha256": "57ee30f487fe72102d65af443d96e8575b7a7f3f6ca835376d8d313269c0c3e2",
+      "bytes": 19129
+    },
+    {
+      "id": "chapter-040",
+      "number": 40,
+      "file": "data/chapters/040.html",
+      "sha256": "584e5462e82a43c3aa7900b610541f095bc8681df5494823598adaaedb8db92f",
+      "bytes": 10420
+    },
+    {
+      "id": "chapter-041",
+      "number": 41,
+      "file": "data/chapters/041.html",
+      "sha256": "10452ac02581bc2b18d16a6982782b7c478a839d10ef95c42e5855a3e7865d02",
+      "bytes": 3637
+    },
+    {
+      "id": "chapter-042",
+      "number": 42,
+      "file": "data/chapters/042.html",
+      "sha256": "9d71e7b2f38a6bfca7f98df35006083cbd95eeac934af8e687a017159ab34845",
+      "bytes": 8362
+    },
+    {
+      "id": "chapter-043",
+      "number": 43,
+      "file": "data/chapters/043.html",
+      "sha256": "d350b5c6c80a4002518fa3c06cbe482367873e081f177c4e6d4f400f11a9f1e6",
+      "bytes": 11687
+    },
+    {
+      "id": "chapter-044",
+      "number": 44,
+      "file": "data/chapters/044.html",
+      "sha256": "7dfcd6a9a7caf3f71c2c3f4f6f0e404109a8fc2a19835248d8e220ca40f07719",
+      "bytes": 14702
+    },
+    {
+      "id": "chapter-045",
+      "number": 45,
+      "file": "data/chapters/045.html",
+      "sha256": "75f7301fe2f5271b9b43d6cddfa94d0a2d8118f4c85050d220173b8ecea7a228",
+      "bytes": 5253
+    },
+    {
+      "id": "chapter-046",
+      "number": 46,
+      "file": "data/chapters/046.html",
+      "sha256": "082e2315558310d15e8186291e10d94a85fdd86f4cb2ecdd16d90ef54e8be80d",
+      "bytes": 12848
+    },
+    {
+      "id": "chapter-047",
+      "number": 47,
+      "file": "data/chapters/047.html",
+      "sha256": "af52d2efedc94801b29ee02f8f019b7738d94f022ca4e4aace24870be3e1bae0",
+      "bytes": 10351
+    },
+    {
+      "id": "chapter-048",
+      "number": 48,
+      "file": "data/chapters/048.html",
+      "sha256": "12b34015bd7db7f45e9cd6ef1ed904537cf7fc5da2125e72de21afdf4b2c5cc2",
+      "bytes": 18268
+    },
+    {
+      "id": "chapter-049",
+      "number": 49,
+      "file": "data/chapters/049.html",
+      "sha256": "1db6f750e5147e42806fa092d7e5c65a1ec2a84152ab992e9b181a824de13a4c",
+      "bytes": 3500
+    },
+    {
+      "id": "chapter-050",
+      "number": 50,
+      "file": "data/chapters/050.html",
+      "sha256": "3eb8d1a905ee29d03b7b3bde2bd7ac6a080d6b9892701f742c22f52424a9ca55",
+      "bytes": 2945
+    },
+    {
+      "id": "chapter-051",
+      "number": 51,
+      "file": "data/chapters/051.html",
+      "sha256": "08608dec3d2d77bba22ef666564c14b05b8ffde02c4ed303dbdfcd1bcdafdab9",
+      "bytes": 20726
+    },
+    {
+      "id": "chapter-052",
+      "number": 52,
+      "file": "data/chapters/052.html",
+      "sha256": "e6737f033be60554f926fc21097852dfc896a760ffb16fe7232516c4f064146d",
+      "bytes": 12648
+    },
+    {
+      "id": "chapter-053",
+      "number": 53,
+      "file": "data/chapters/053.html",
+      "sha256": "f5fe22414d7cc155805016322130e77f67cf63195d68224250c75ad3526bf726",
+      "bytes": 7684
+    },
+    {
+      "id": "chapter-054",
+      "number": 54,
+      "file": "data/chapters/054.html",
+      "sha256": "b1bb1f3eef66017d7e023b3812885d39168b1032be5a4625f5d5b3539a0b6583",
+      "bytes": 17143
+    },
+    {
+      "id": "chapter-055",
+      "number": 55,
+      "file": "data/chapters/055.html",
+      "sha256": "d2231c546b5f2c55800a40984c1277fb280ae06a053190f2d0968aad7b085c20",
+      "bytes": 30477
+    },
+    {
+      "id": "chapter-056",
+      "number": 56,
+      "file": "data/chapters/056.html",
+      "sha256": "2260c7321231b2e3eb738d803668c422a3175e03bc6404d3615396f3132b4633",
+      "bytes": 13588
+    },
+    {
+      "id": "chapter-057",
+      "number": 57,
+      "file": "data/chapters/057.html",
+      "sha256": "2f5031c37206b4b22fa40dcd205810a2c44597d45d0f9f509cb601d2b4877a2d",
+      "bytes": 17407
+    },
+    {
+      "id": "chapter-058",
+      "number": 58,
+      "file": "data/chapters/058.html",
+      "sha256": "5c1a97ad0635ef3a512d873fb0c882c98b7201185dc5b6fb6cbec3fdd8c23776",
+      "bytes": 35868
+    },
+    {
+      "id": "chapter-059",
+      "number": 59,
+      "file": "data/chapters/059.html",
+      "sha256": "d5d8c67a17cae735b4db3648044498350778785fc94ac702c9edfb0277052b88",
+      "bytes": 15798
+    },
+    {
+      "id": "chapter-060",
+      "number": 60,
+      "file": "data/chapters/060.html",
+      "sha256": "0d60e11117e1e26b55ae82ae80fb68fd45eaf0e740bca75c97cb762141fd8c36",
+      "bytes": 18484
+    },
+    {
+      "id": "chapter-061",
+      "number": 61,
+      "file": "data/chapters/061.html",
+      "sha256": "73915207fa92680fbba736df8a3b0cbc05e74a14698fd55e6221479008a3f8b0",
+      "bytes": 18723
+    },
+    {
+      "id": "chapter-062",
+      "number": 62,
+      "file": "data/chapters/062.html",
+      "sha256": "6faf8db3cedcf96e134779c7cbdb5f425f835aaaf02485a21504961bd4009029",
+      "bytes": 25276
+    },
+    {
+      "id": "chapter-063",
+      "number": 63,
+      "file": "data/chapters/063.html",
+      "sha256": "88b0881d335cc3b71a986d15ea77019aebe8172c28c8f94995ceea4ce9670364",
+      "bytes": 22608
+    },
+    {
+      "id": "chapter-064",
+      "number": 64,
+      "file": "data/chapters/064.html",
+      "sha256": "e39683bf21de74ccab6f9c1f186faad50b7284e89da6822383956090d07ed03f",
+      "bytes": 21422
+    },
+    {
+      "id": "chapter-065",
+      "number": 65,
+      "file": "data/chapters/065.html",
+      "sha256": "c1b8b06d28a1e064ec9e659a11f866ca507c8399086e51e2d7f8ce0fc75d074e",
+      "bytes": 2594
+    },
+    {
+      "id": "chapter-066",
+      "number": 66,
+      "file": "data/chapters/066.html",
+      "sha256": "d5c972e7866cc637b487f42cbc940cce5b68093f19814e69962fcbdb13fdd6d7",
+      "bytes": 10023
+    },
+    {
+      "id": "chapter-067",
+      "number": 67,
+      "file": "data/chapters/067.html",
+      "sha256": "fa7dd7b6f2c50eef3c6adab2a176e33cd55650628c4620377cf06814dc376727",
+      "bytes": 15582
+    },
+    {
+      "id": "chapter-068",
+      "number": 68,
+      "file": "data/chapters/068.html",
+      "sha256": "384cef96429ebb59925db99ad3f4a00235f78d77abe56360f35cf3631bee5215",
+      "bytes": 11945
+    },
+    {
+      "id": "chapter-069",
+      "number": 69,
+      "file": "data/chapters/069.html",
+      "sha256": "d5724f0db8e6cd33889f8421a2850be7bc7f10826fd692135a8035f5e3561516",
+      "bytes": 3945
+    },
+    {
+      "id": "chapter-070",
+      "number": 70,
+      "file": "data/chapters/070.html",
+      "sha256": "427350eaa8d9c7ea7bd4ce77aaf78bc797fd5b949a43571f9ad24ee0e05169dd",
+      "bytes": 14350
+    },
+    {
+      "id": "chapter-071",
+      "number": 71,
+      "file": "data/chapters/071.html",
+      "sha256": "5b8734e31125d2738d960c8076c1371a283f24a49e0f25a928d74de6ecdf6606",
+      "bytes": 10296
+    },
+    {
+      "id": "chapter-072",
+      "number": 72,
+      "file": "data/chapters/072.html",
+      "sha256": "10801ea8d97dc2211e5f258d036f802867ae824287c47038c1e7c7cb4875353a",
+      "bytes": 7120
+    },
+    {
+      "id": "chapter-073",
+      "number": 73,
+      "file": "data/chapters/073.html",
+      "sha256": "20e045eeee0f174ce13ceceb94beeb977ae3b1dd27a747452333a576e07b1b03",
+      "bytes": 29835
+    },
+    {
+      "id": "chapter-074",
+      "number": 74,
+      "file": "data/chapters/074.html",
+      "sha256": "c4df71837d2d1af50652f4680ac3dac5471df39cb1f822e72c118ccee388a79b",
+      "bytes": 15199
+    },
+    {
+      "id": "chapter-075",
+      "number": 75,
+      "file": "data/chapters/075.html",
+      "sha256": "001b0ca97623e66b38fea444fc3e1438df124664cdcfcfe45fcd52d0766f8dce",
+      "bytes": 13575
+    },
+    {
+      "id": "chapter-076",
+      "number": 76,
+      "file": "data/chapters/076.html",
+      "sha256": "26a3d6e2c276ea3b30a032c22c83e3c1c85e1c20f0f0df998b6e2c37a8819fe8",
+      "bytes": 21735
+    },
+    {
+      "id": "chapter-077",
+      "number": 77,
+      "file": "data/chapters/077.html",
+      "sha256": "275a80a6da151a67fd4ee830e9503ab06c23ebd458a3488fbfe5fde2982f646b",
+      "bytes": 17399
+    },
+    {
+      "id": "chapter-078",
+      "number": 78,
+      "file": "data/chapters/078.html",
+      "sha256": "39d841cfe4c6306a25a090b40ca1a65728af8ed09c4ede4baf41668071184098",
+      "bytes": 16608
+    },
+    {
+      "id": "chapter-079",
+      "number": 79,
+      "file": "data/chapters/079.html",
+      "sha256": "a9455cd916141d3dea0562219cc7beb22c37585b4203c1e3f248a6de204f8d71",
+      "bytes": 10625
+    },
+    {
+      "id": "chapter-080",
+      "number": 80,
+      "file": "data/chapters/080.html",
+      "sha256": "7d8626b4237ffe799ffb2f94b6573b22def7f32e82ab281fdf982d11da33baba",
+      "bytes": 31940
+    },
+    {
+      "id": "chapter-081",
+      "number": 81,
+      "file": "data/chapters/081.html",
+      "sha256": "36e0e394c27ef180d23a1d8083826c0f62226b31e065bb300a9bfe901da4e005",
+      "bytes": 10143
+    },
+    {
+      "id": "chapter-082",
+      "number": 82,
+      "file": "data/chapters/082.html",
+      "sha256": "98ef59e3ca39c4b059758af77bbd95daaa4226e21bf6940b0c06b8f640a13c7e",
+      "bytes": 21811
+    },
+    {
+      "id": "chapter-083",
+      "number": 83,
+      "file": "data/chapters/083.html",
+      "sha256": "2777f6b947aaf820b99a86f0ca07e2181b61ef59a4fa77dcaf3d5f134bd23574",
+      "bytes": 11911
+    },
+    {
+      "id": "chapter-084",
+      "number": 84,
+      "file": "data/chapters/084.html",
+      "sha256": "5d20dedba57c8b316dfc610427facf9d3eb367cf1b548a62ba4302998f7c4e13",
+      "bytes": 20632
+    },
+    {
+      "id": "chapter-085",
+      "number": 85,
+      "file": "data/chapters/085.html",
+      "sha256": "b2322d15cf2f2ce4e06d008aeaddba301e4214111883909ea95585a185074627",
+      "bytes": 22939
+    },
+    {
+      "id": "chapter-086",
+      "number": 86,
+      "file": "data/chapters/086.html",
+      "sha256": "a514fbcdde05ea43a7ca41be204e5c1910f6d4ba6e9c8d0c285cf9acf91ab6e5",
+      "bytes": 27204
+    }
+  ]
+}

@@ -1,0 +1,299 @@
+/* Оглавление. Значения здесь являются рабочей технической основой. */
+
+.contents-screen {
+  position: absolute;
+  z-index: 1;
+  inset: 0;
+  overflow: hidden;
+  background:
+    radial-gradient(ellipse at 50% 0%, rgba(96, 82, 68, 0.11), transparent 48%),
+    #11100f;
+  color: #e7e0d7;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 1.2s ease;
+}
+
+.contents-screen.is-active {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.contents-shell {
+  display: flex;
+  flex-direction: column;
+  width: min(100%, 900px);
+  height: 100%;
+  margin: 0 auto;
+  padding: max(26px, env(safe-area-inset-top)) clamp(22px, 5vw, 54px) 0;
+}
+
+.contents-header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 22px;
+  flex-wrap: wrap;
+  padding: 8px 0 22px;
+}
+
+.contents-heading {
+  min-width: 180px;
+}
+
+.contents-eyebrow {
+  margin: 0 0 10px;
+  color: #8e857b;
+  font-family: Arial, sans-serif;
+  font-size: 10px;
+  letter-spacing: 0.34em;
+}
+
+.contents-heading h1 {
+  margin: 0;
+  color: #eee7df;
+  font-size: clamp(32px, 6vw, 46px);
+  font-weight: 400;
+  letter-spacing: 0.015em;
+  line-height: 1.08;
+}
+
+.density-control {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px;
+  border: 1px solid rgba(220, 207, 193, 0.14);
+  border-radius: 3px;
+  background: rgba(255, 255, 255, 0.018);
+}
+
+.density-control button {
+  min-height: 32px;
+  padding: 6px 9px;
+  border: 0;
+  border-radius: 2px;
+  background: transparent;
+  color: #8e877f;
+  font-family: Arial, sans-serif;
+  font-size: 11px;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: color 160ms ease, background 160ms ease;
+}
+
+.density-control button[aria-pressed="true"] {
+  background: rgba(207, 183, 158, 0.13);
+  color: #e8d7c5;
+}
+
+.density-control button:focus-visible,
+.range-button:focus-visible,
+.chapter-entry:focus-visible {
+  outline: 2px solid rgba(211, 184, 155, 0.72);
+  outline-offset: 3px;
+}
+
+.contents-ranges {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex: 0 0 auto;
+  gap: 7px;
+  overflow-x: auto;
+  padding: 12px 0 13px;
+  border-top: 1px solid rgba(220, 207, 193, 0.12);
+  border-bottom: 1px solid rgba(220, 207, 193, 0.12);
+  scrollbar-width: none;
+}
+
+.contents-ranges::-webkit-scrollbar {
+  display: none;
+}
+
+.range-button {
+  flex: 0 0 auto;
+  min-width: 52px;
+  padding: 7px 11px;
+  border: 1px solid transparent;
+  border-radius: 2px;
+  background: transparent;
+  color: #8c857d;
+  font-family: Arial, sans-serif;
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+  cursor: pointer;
+  transition: color 160ms ease, border-color 160ms ease, background 160ms ease;
+}
+
+.range-button.is-active {
+  border-color: rgba(202, 177, 151, 0.25);
+  background: rgba(202, 177, 151, 0.09);
+  color: #e2cdb7;
+}
+
+.contents-scroll {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 10px 2px max(32px, env(safe-area-inset-bottom));
+  scrollbar-width: thin;
+  scrollbar-color: rgba(210, 194, 176, 0.22) transparent;
+}
+
+.contents-loading {
+  padding: 30px 8px;
+  color: #8c857d;
+  font-size: 14px;
+}
+
+.chapter-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.chapter-row {
+  position: relative;
+  flex: 0 0 auto;
+  scroll-margin-top: 10px;
+}
+
+.chapter-entry {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 17px;
+  width: 100%;
+  min-width: 0;
+  padding: 12px 12px 12px 17px;
+  border: 0;
+  border-radius: 1px;
+  background: transparent;
+  color: #c9c1b7;
+  text-align: left;
+  cursor: pointer;
+  transition: color 150ms ease, background 150ms ease;
+}
+
+.chapter-number {
+  flex: 0 0 34px;
+  color: #817970;
+  font-family: Arial, sans-serif;
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.045em;
+  transition: color 150ms ease;
+}
+
+.chapter-title {
+  display: block;
+  min-width: 0;
+  overflow: hidden;
+  color: inherit;
+  font-size: 15px;
+  line-height: 1.45;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  transition: color 150ms ease;
+}
+
+.chapter-entry:hover {
+  background: rgba(255, 255, 255, 0.035);
+  color: #f0e8de;
+}
+
+.chapter-entry.is-read {
+  color: #716b64;
+}
+
+.chapter-entry.is-read .chapter-number {
+  color: #625c56;
+}
+
+.chapter-entry.is-current {
+  color: #ead4bc;
+  background: rgba(205, 175, 144, 0.075);
+}
+
+.chapter-entry.is-current .chapter-number {
+  color: #d6b99b;
+}
+
+.chapter-entry.is-current::before {
+  position: absolute;
+  top: 20%;
+  bottom: 20%;
+  left: 0;
+  width: 2px;
+  background: #bd9874;
+  content: "";
+}
+
+/* Три утверждённых режима плотности */
+
+.contents-screen[data-density="compact"] .chapter-entry {
+  padding-top: 6px;
+  padding-bottom: 6px;
+}
+
+.contents-screen[data-density="compact"] .chapter-title {
+  font-size: 14px;
+  line-height: 1.35;
+}
+
+.contents-screen[data-density="spacious"] .chapter-entry {
+  padding-top: 17px;
+  padding-bottom: 17px;
+}
+
+.contents-screen[data-density="spacious"] .chapter-title {
+  font-size: 16px;
+  line-height: 1.5;
+}
+
+@media (max-width: 560px) {
+  .contents-shell {
+    padding-right: 18px;
+    padding-left: 18px;
+  }
+
+  .contents-header {
+    align-items: flex-start;
+    gap: 17px;
+    padding-bottom: 17px;
+  }
+
+  .contents-heading h1 {
+    font-size: 35px;
+  }
+
+  .density-control {
+    width: 100%;
+  }
+
+  .density-control button {
+    flex: 1 1 0;
+    padding-right: 5px;
+    padding-left: 5px;
+    font-size: 10px;
+  }
+
+  .chapter-entry {
+    gap: 12px;
+    padding-right: 6px;
+    padding-left: 12px;
+  }
+
+  .chapter-number {
+    flex-basis: 29px;
+  }
+
+  .chapter-title {
+    font-size: 14px;
+  }
+}

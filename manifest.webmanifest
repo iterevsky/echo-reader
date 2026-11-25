@@ -1,0 +1,13 @@
+{
+  "id": "./",
+  "name": "ЭХО",
+  "short_name": "ЭХО",
+  "description": "Книжное издание «ЭХО»",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#11100f",
+  "theme_color": "#11100f",
+  "lang": "ru"
+}
