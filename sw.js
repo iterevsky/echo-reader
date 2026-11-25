@@ -1,5 +1,5 @@
 /* ЭХО: Service Worker. BUILD_ID меняется при выпуске обновления оболочки. */
-const BUILD_ID = 'echo-shell-2026-11-25-v4';
+const BUILD_ID = 'echo-shell-2026-11-25-v5';
 const SHELL_CACHE = `echo-shell-${BUILD_ID}`;
 const META_CACHE = 'echo-meta-v1';
 const BOOTSTRAP_CACHE = 'echo-content-bootstrap-v1';
@@ -12,11 +12,11 @@ const coreFiles = [
   'manifest.webmanifest',
   'styles/install.css',
   'scripts/core/install.js',
-  'assets/icons/favicon.svg',
-  'assets/icons/icon-192.png',
-  'assets/icons/icon-512.png',
-  'assets/icons/icon-maskable-512.png',
-  'assets/icons/apple-touch-icon.png',
+  'assets/icons/favicon-v5.svg',
+  'assets/icons/icon-v5-192.png',
+  'assets/icons/icon-v5-512.png',
+  'assets/icons/icon-v5-maskable-512.png',
+  'assets/icons/apple-touch-v5.png',
   'styles/base.css',
   'styles/contents.css',
   'styles/reader.css',

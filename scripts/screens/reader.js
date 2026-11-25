@@ -532,6 +532,7 @@ export function createReaderScreen(root, { onBack, onCurrentChapterChanged }) {
   });
 
   scrollArea.addEventListener('scroll', () => {
+    if (!settingsOpen && root.classList.contains('controls-visible')) hideControls();
     if (saveTimer !== null) window.clearTimeout(saveTimer);
 
     saveTimer = window.setTimeout(() => {
