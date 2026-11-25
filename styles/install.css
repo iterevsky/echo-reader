@@ -1,0 +1,13 @@
+.install-link[hidden] { display: none !important; }
+.install-link { display: flex; align-items: center; gap: 10px; flex: 0 0 auto; width: 100%; min-height: 44px; padding: 10px 4px; margin: 0; border: 0; border-top: 1px solid rgba(220,207,193,.14); background: transparent; color: #c4b5a5; text-align: left; font: 13px/1.4 system-ui,sans-serif; cursor: pointer; }
+.install-link:hover { color: #f2e7da; }
+.install-arrow { margin-left: auto; font-size: 21px; }
+.install-link:focus-visible, .install-dialog button:focus-visible { outline: 2px solid #cab49b; outline-offset: 3px; }
+.install-dialog { position: fixed; inset: auto 0 max(16px,env(safe-area-inset-bottom)) 0; width: min(calc(100% - 32px),420px); max-height: 80dvh; overflow: auto; box-sizing: border-box; margin: auto; padding: 22px; color: #eee7df; background: #22201e; border: 1px solid #50463e; border-radius: 18px; font: 14px/1.6 system-ui,sans-serif; }
+.install-dialog::backdrop { background: rgba(0,0,0,.64); }
+.install-dialog-header { display: flex; align-items: center; gap: 13px; }
+.install-dialog-header img { border-radius: 12px; }
+.install-dialog h2 { font: 500 19px/1.3 system-ui,sans-serif; margin: 0; }
+.install-kicker { font-size: 10px; letter-spacing: .24em; color: #b6a494; margin: 0 0 3px; }
+.install-dialog p[data-install-help] { margin: 18px 0; color: #d5cbc1; }
+.install-dialog button { display: block; width: 100%; min-height: 44px; border: 0; border-radius: 8px; color: #211d19; background: #ddcbb5; font: 600 14px system-ui,sans-serif; cursor: pointer; }
