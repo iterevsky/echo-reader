@@ -7,7 +7,7 @@ import {
   markChapterRead
 } from '../core/storage.js';
 
-import { assignParagraphIds, locateParagraph, migrateLegacyAnchor } from '../core/anchors.js';
+import { assignParagraphIds, locateParagraph, migrateLegacyAnchor, resolveReadingOffset } from '../core/anchors.js';
 import { loadArtwork } from '../core/artwork.js';
 
 const CONTROL_HIDE_DELAY = 3800;
@@ -153,7 +153,8 @@ export function createReaderScreen(root, { onBack, onCurrentChapterChanged, onSe
     return {
       version: 2,
       paragraphId: paragraph.getAttribute('data-echo-anchor'),
-      quote: paragraph.textContent.slice(Math.max(0, (textOffset || 0) - 20), (textOffset || 0) + 80),
+      quote: Number.isInteger(textOffset) ? paragraph.textContent.slice(Math.max(0, textOffset - 20), textOffset + 80) : null,
+      quoteOffset: Number.isInteger(textOffset) ? Math.min(20, textOffset) : null,
       paragraphIndex,
       textOffset,
       paragraphRatio,
@@ -174,7 +175,7 @@ export function createReaderScreen(root, { onBack, onCurrentChapterChanged, onSe
 
     if (Number.isInteger(anchor.textOffset)) {
       const nodes = getTextNodes(paragraph);
-      let remaining = anchor.textOffset;
+      let remaining = resolveReadingOffset(paragraph.textContent, anchor);
 
       for (const node of nodes) {
         const length = node.textContent.length;
@@ -367,7 +368,7 @@ export function createReaderScreen(root, { onBack, onCurrentChapterChanged, onSe
     const sourceId = sourceArticle.getAttribute('data-chapter-id');
     if (sourceId && sourceId !== chapter.id) throw new Error('Файл не соответствует выбранной главе.');
     const firstText = sourceArticle.querySelector(':scope > p')?.textContent || '';
-    targetAnchor = migrateLegacyAnchor(targetAnchor, firstText, chapter.title);
+    targetAnchor = targetPosition <= 1 ? null : migrateLegacyAnchor(targetAnchor, firstText, chapter.title);
     const paragraphs = assignParagraphIds(sourceArticle);
     if (!paragraphs.length) throw new Error('В главе отсутствует текст.');
     // Optional metadata must never delay or prevent normal reading.
@@ -484,9 +485,10 @@ export function createReaderScreen(root, { onBack, onCurrentChapterChanged, onSe
       const opened = await openChapter(target, { restorePosition: false });
       if (!opened || generation !== moveGeneration) return;
       requestAnimationFrame(() => {
+        if (generation !== moveGeneration) return;
         transitionLayer.classList.remove('is-visible');
         window.setTimeout(() => {
-          transitionLayer.setAttribute('aria-hidden', 'true');
+          if (generation === moveGeneration) transitionLayer.setAttribute('aria-hidden', 'true');
         }, 420);
       });
     } catch (error) {
@@ -496,6 +498,7 @@ export function createReaderScreen(root, { onBack, onCurrentChapterChanged, onSe
       transitionTitle.textContent = 'Остаёмся в текущей главе';
       console.error('ЭХО: ошибка перехода между главами.', error);
       await new Promise((resolve) => window.setTimeout(resolve, 900));
+      if (generation !== moveGeneration) return;
       transitionLayer.classList.remove('is-visible');
       transitionLayer.setAttribute('aria-hidden', 'true');
     } finally {

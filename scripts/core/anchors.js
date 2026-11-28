@@ -58,3 +58,14 @@ export function migrateLegacyAnchor(anchor, firstText, title) {
   }
   return next;
 }
+
+export function resolveReadingOffset(text, anchor) {
+  if (!Number.isInteger(anchor.textOffset)) return null;
+  if (anchor.quote && Number.isInteger(anchor.quoteOffset)) {
+    const first = text.indexOf(anchor.quote);
+    if (first >= 0 && text.indexOf(anchor.quote, first + 1) < 0) {
+      return Math.min(text.length, first + anchor.quoteOffset);
+    }
+  }
+  return Math.min(text.length, Math.max(0, anchor.textOffset));
+}

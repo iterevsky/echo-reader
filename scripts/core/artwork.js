@@ -17,6 +17,7 @@ function checkMedia(scene) {
   assert(!('audio' in scene) || (scene.audio && AUDIO.test(scene.audio.file) &&
     AUDIO_TYPES.has(scene.audio.type)), 'Недопустимое описание звука.');
   checkEffects(scene.effects);
+  assert(scene.afterReveal === undefined || ['still','animate'].includes(scene.afterReveal), 'Неизвестное поведение после проявления.');
 }
 export function validateArtwork(value, chapterId, paragraphIds) {
   assert(value && value.schemaVersion === 1 && value.chapter === chapterId,

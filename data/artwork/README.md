@@ -14,7 +14,8 @@
   "chapter": "chapter-001",
   "cover": {
     "image": "assets/illustrations/001-cover.webp",
-    "effects": ["V01", "V04"]
+    "effects": ["V01", "V04"],
+    "afterReveal": "animate"
   },
   "scenes": [
     {

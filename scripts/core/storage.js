@@ -1,5 +1,7 @@
 const STORAGE_KEY = 'echo-reader-state-v1';
 const BACKUP_KEY = 'echo-reader-state-v1-backup';
+// Current session remains usable if persistent storage is denied or full.
+let volatileState = null;
 
 export const DEFAULT_READER_SETTINGS = Object.freeze({
   fontSize: 19,
@@ -59,6 +61,7 @@ function normalizeAnchor(value) {
     version: value.version === 2 ? 2 : 1,
     paragraphId: typeof value.paragraphId === 'string' ? value.paragraphId.slice(0, 200) : null,
     quote: typeof value.quote === 'string' ? value.quote.slice(0, 160) : null,
+    quoteOffset: Number.isInteger(value.quoteOffset) && value.quoteOffset >= 0 ? Math.min(value.quoteOffset, 160) : null,
     atStart: value.atStart === true,
     paragraphIndex,
     textOffset,
@@ -105,6 +108,7 @@ function parseStoredValue(raw) {
 }
 
 export function getState() {
+  if (volatileState) return normalizeState(volatileState);
   try {
     const rawPrimary = localStorage.getItem(STORAGE_KEY);
     const primary = parseStoredValue(rawPrimary);
@@ -143,12 +147,14 @@ export function updateState(patch) {
   try {
     const oldValue = localStorage.getItem(STORAGE_KEY);
     if (oldValue && parseStoredValue(oldValue)) {
-      localStorage.setItem(BACKUP_KEY, oldValue);
+      try { localStorage.setItem(BACKUP_KEY, oldValue); }
+      catch (error) { console.warn('ЭХО: резервная копия не сохранена.', error); }
     }
-
     localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
+    volatileState = null;
   } catch (error) {
-    console.warn('ЭХО: не удалось сохранить состояние приложения.', error);
+    volatileState = next;
+    console.warn('ЭХО: состояние сохранено только до закрытия приложения.', error);
   }
 
   return next;
