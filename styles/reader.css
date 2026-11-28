@@ -609,25 +609,85 @@
 .echo-art__picture img { display:block; width:100%; height:100%; object-fit:contain; user-select:none; position:relative; z-index:1; }
 .echo-art__picture::before { content:''; position:absolute; inset:-12px; background:var(--art-image) center/cover no-repeat; filter:blur(22px) brightness(.43); opacity:.65; }
 .echo-art__light,.echo-art__echo,.echo-art__shade { position:absolute; inset:0; z-index:2; pointer-events:none; }
-.echo-art { --art-tint:rgba(220,192,153,.25); --art-brightness:1.035; --art-saturation:1.045; --art-hue:-1deg; --art-echo-alpha:.07; --art-cycle:11s; --reveal:0; }
-.echo-art[data-mood="cool"] { --art-tint:rgba(143,180,218,.26); --art-brightness:1.045; --art-saturation:1.035; --art-hue:1deg; --art-echo-alpha:.09; --art-cycle:13s; }
-.echo-art[data-mood="warm"] { --art-tint:rgba(244,179,103,.28); --art-brightness:1.055; --art-saturation:1.065; --art-hue:-1.4deg; --art-echo-alpha:.065; --art-cycle:10s; }
-.echo-art__light { background:radial-gradient(ellipse at 32% 56%,var(--art-tint),transparent 64%); mix-blend-mode:soft-light; opacity:0; transition:opacity .7s ease; }
-.echo-art__echo { background:var(--art-image) center/contain no-repeat; mask-image:radial-gradient(ellipse at 76% 62%,#000 0%,transparent 62%); opacity:0; transition:opacity .7s ease; }
-.echo-art__shade { background:linear-gradient(180deg,rgba(10,12,14,.23),transparent 26%,transparent 68%,rgba(10,12,14,.22)); }
+/* Expressive light laboratory preset; the source photograph never changes. */
+.echo-art { --art-base-brightness:1; --art-base-saturation:1; --art-tint:rgb(139,153,166); --art-color:rgb(161,156,147); --art-echo-alpha:.12; --art-cycle:18s; --reveal:0; }
+.echo-art--cover[data-mood="neutral"] { --art-base-brightness:.937; --art-base-saturation:.838; }
+.echo-art[data-mood="cool"] { --art-tint:rgb(113,156,205); --art-color:rgb(134,171,208); --art-cycle:19s; }
+.echo-art[data-mood="warm"] { --art-tint:rgb(221,155,85); --art-color:rgb(235,180,113); --art-cycle:17s; }
+.echo-art__picture img { filter:brightness(var(--art-base-brightness)) saturate(var(--art-base-saturation)); }
+.echo-art__light { background:radial-gradient(ellipse at 32% 56%,var(--art-tint),transparent 68%); mix-blend-mode:soft-light; opacity:0; }
+.echo-art__echo { background:var(--art-image) center/contain no-repeat; mask-image:radial-gradient(ellipse at 76% 62%,#000 0%,transparent 62%); opacity:0; }
+.echo-art__picture::after { content:''; position:absolute; inset:0; z-index:2; pointer-events:none; background:var(--art-color); mix-blend-mode:color; opacity:0; }
+.echo-art__shade { z-index:3; background:linear-gradient(180deg,rgba(10,12,14,.23),transparent 26%,transparent 68%,rgba(10,12,14,.22)); }
 .echo-art__number { position:absolute; z-index:3; top:23%; left:0; width:100%; margin:0; padding:0 10px; font:400 clamp(24px,4vw,40px)/1.2 Georgia,serif; letter-spacing:.1em; color:#f7f0e5; text-shadow:0 1px 8px #171615,0 0 18px #101316; }
 /* Progressive reveal is independent of the animation that breathes at idle. */
 .reader-screen[data-art-motion="true"] .echo-art[data-effects~="V01"] .echo-art__picture { opacity:calc(.15 + var(--reveal)*.85); }
-.reader-screen[data-art-motion="true"] .echo-art[data-effects~="V01"] .echo-art__picture img { filter:saturate(calc(.25 + .75*var(--reveal))) contrast(calc(.72 + .28*var(--reveal))); }
+.reader-screen[data-art-motion="true"] .echo-art[data-effects~="V01"] .echo-art__picture img { filter:brightness(var(--art-base-brightness)) saturate(calc(var(--art-base-saturation) * (.25 + .75*var(--reveal)))) contrast(calc(.72 + .28*var(--reveal))); }
 .reader-screen[data-art-motion="true"] .echo-art[data-effects~="V02"] .echo-art__picture { opacity:var(--reveal); }
 .reader-screen[data-art-motion="true"] .echo-art[data-effects~="V03"] .echo-art__picture { filter:blur(calc(5px*(1 - var(--reveal)))); }
 .reader-screen[data-reading-mode="pages"][data-art-motion="true"] .echo-art[data-active="true"] .echo-art__picture { transition:opacity .65s ease,filter .65s ease; }
-.reader-screen[data-art-idle="1"][data-art-motion="true"] .echo-art[data-active="true"][data-animate="true"][data-effects~="V04"] .echo-art__light { animation:echo-light var(--art-cycle) ease-in-out infinite alternate; }
-.reader-screen[data-art-idle="1"][data-art-motion="true"] .echo-art[data-active="true"][data-animate="true"][data-effects~="V04"] .echo-art__picture img { animation:echo-colors 8.7s ease-in-out infinite alternate; }
-.reader-screen[data-art-idle="1"][data-art-motion="true"] .echo-art[data-active="true"][data-animate="true"][data-effects~="V05"] .echo-art__echo { animation:echo-drift 12.9s ease-in-out infinite; }
-@keyframes echo-light { 0% {opacity:0;transform:translate(-2%,0)} 100% {opacity:.85;transform:translate(3%,1%)} }
-@keyframes echo-colors { 0% {filter:brightness(1) saturate(1) hue-rotate(0deg)} 100% {filter:brightness(var(--art-brightness)) saturate(var(--art-saturation)) hue-rotate(var(--art-hue))} }
-@keyframes echo-drift { 0%,100% {opacity:0;transform:translate(0,0)} 42% {opacity:var(--art-echo-alpha);transform:translate(2px,-1px)} 70% {opacity:calc(var(--art-echo-alpha)*.65);transform:translate(-1.5px,.75px)} }
+.reader-screen[data-art-motion="true"] .echo-art[data-active="true"][data-breathing="true"][data-animate="true"][data-effects~="V04"] .echo-art__light { animation:echo-light var(--art-cycle) ease-in-out infinite; animation-play-state:paused; }
+.reader-screen[data-art-motion="true"] .echo-art[data-active="true"][data-breathing="true"][data-animate="true"][data-effects~="V04"] .echo-art__picture img { animation:echo-colors calc(var(--art-cycle) * 3) linear infinite; animation-play-state:paused; }
+.reader-screen[data-art-motion="true"] .echo-art[data-active="true"][data-breathing="true"][data-animate="true"][data-effects~="V04"] .echo-art__picture::after { animation:echo-tint calc(var(--art-cycle) * 1.27) ease-in-out infinite; animation-play-state:paused; }
+.reader-screen[data-art-motion="true"] .echo-art[data-active="true"][data-breathing="true"][data-animate="true"][data-effects~="V05"] .echo-art__echo { animation:echo-drift calc(var(--art-cycle) * .91) ease-in-out infinite; animation-play-state:paused; }
+.reader-screen[data-art-idle="1"][data-art-motion="true"] .echo-art[data-active="true"][data-breathing="true"][data-animate="true"] :is(.echo-art__light,.echo-art__picture img,.echo-art__echo),
+.reader-screen[data-art-idle="1"][data-art-motion="true"] .echo-art[data-active="true"][data-breathing="true"][data-animate="true"] .echo-art__picture::after { animation-play-state:running; }
+@keyframes echo-light { 0%,100% {opacity:0;transform:translate(-2%,0)} 50% {opacity:.45;transform:translate(3%,1.5%)} }
+@keyframes echo-tint { 0%,100% {opacity:0} 46% {opacity:.22} 74% {opacity:.08} }
+@keyframes echo-drift { 0%,100% {opacity:0;transform:translate(0,0)} 37% {opacity:var(--art-echo-alpha);transform:translate(5px,-2px)} 76% {opacity:calc(var(--art-echo-alpha)*.65);transform:translate(-3px,1px)} }
+/* Three light cycles with two slightly different color cycles, sampled smoothly.
+   Start/end at the static grade to avoid a jump when a new image first breathes. */
+@keyframes echo-colors {
+  0.00000% { filter:brightness(calc(var(--art-base-brightness)*1.000000)) saturate(calc(var(--art-base-saturation)*1.000000)); }
+  2.08333% { filter:brightness(calc(var(--art-base-brightness)*1.045922)) saturate(calc(var(--art-base-saturation)*1.023809)); }
+  4.16667% { filter:brightness(calc(var(--art-base-brightness)*1.084853)) saturate(calc(var(--art-base-saturation)*1.046178)); }
+  6.25000% { filter:brightness(calc(var(--art-base-brightness)*1.110866)) saturate(calc(var(--art-base-saturation)*1.065763)); }
+  8.33333% { filter:brightness(calc(var(--art-base-brightness)*1.120000)) saturate(calc(var(--art-base-saturation)*1.081403)); }
+  10.41667% { filter:brightness(calc(var(--art-base-brightness)*1.110866)) saturate(calc(var(--art-base-saturation)*1.092195)); }
+  12.50000% { filter:brightness(calc(var(--art-base-brightness)*1.084853)) saturate(calc(var(--art-base-saturation)*1.097558)); }
+  14.58333% { filter:brightness(calc(var(--art-base-brightness)*1.045922)) saturate(calc(var(--art-base-saturation)*1.097264)); }
+  16.66667% { filter:brightness(calc(var(--art-base-brightness)*1.000000)) saturate(calc(var(--art-base-saturation)*1.091452)); }
+  18.75000% { filter:brightness(calc(var(--art-base-brightness)*0.954078)) saturate(calc(var(--art-base-saturation)*1.080622)); }
+  20.83333% { filter:brightness(calc(var(--art-base-brightness)*0.915147)) saturate(calc(var(--art-base-saturation)*1.065592)); }
+  22.91667% { filter:brightness(calc(var(--art-base-brightness)*0.889134)) saturate(calc(var(--art-base-saturation)*1.047446)); }
+  25.00000% { filter:brightness(calc(var(--art-base-brightness)*0.880000)) saturate(calc(var(--art-base-saturation)*1.027456)); }
+  27.08333% { filter:brightness(calc(var(--art-base-brightness)*0.889134)) saturate(calc(var(--art-base-saturation)*1.006996)); }
+  29.16667% { filter:brightness(calc(var(--art-base-brightness)*0.915147)) saturate(calc(var(--art-base-saturation)*0.987448)); }
+  31.25000% { filter:brightness(calc(var(--art-base-brightness)*0.954078)) saturate(calc(var(--art-base-saturation)*0.970110)); }
+  33.33333% { filter:brightness(calc(var(--art-base-brightness)*1.000000)) saturate(calc(var(--art-base-saturation)*0.956103)); }
+  35.41667% { filter:brightness(calc(var(--art-base-brightness)*1.045922)) saturate(calc(var(--art-base-saturation)*0.946301)); }
+  37.50000% { filter:brightness(calc(var(--art-base-brightness)*1.084853)) saturate(calc(var(--art-base-saturation)*0.941270)); }
+  39.58333% { filter:brightness(calc(var(--art-base-brightness)*1.110866)) saturate(calc(var(--art-base-saturation)*0.941233)); }
+  41.66667% { filter:brightness(calc(var(--art-base-brightness)*1.120000)) saturate(calc(var(--art-base-saturation)*0.946053)); }
+  43.75000% { filter:brightness(calc(var(--art-base-brightness)*1.110866)) saturate(calc(var(--art-base-saturation)*0.955251)); }
+  45.83333% { filter:brightness(calc(var(--art-base-brightness)*1.084853)) saturate(calc(var(--art-base-saturation)*0.968034)); }
+  47.91667% { filter:brightness(calc(var(--art-base-brightness)*1.045922)) saturate(calc(var(--art-base-saturation)*0.983359)); }
+  50.00000% { filter:brightness(calc(var(--art-base-brightness)*1.000000)) saturate(calc(var(--art-base-saturation)*1.000000)); }
+  52.08333% { filter:brightness(calc(var(--art-base-brightness)*0.954078)) saturate(calc(var(--art-base-saturation)*1.016641)); }
+  54.16667% { filter:brightness(calc(var(--art-base-brightness)*0.915147)) saturate(calc(var(--art-base-saturation)*1.031966)); }
+  56.25000% { filter:brightness(calc(var(--art-base-brightness)*0.889134)) saturate(calc(var(--art-base-saturation)*1.044749)); }
+  58.33333% { filter:brightness(calc(var(--art-base-brightness)*0.880000)) saturate(calc(var(--art-base-saturation)*1.053947)); }
+  60.41667% { filter:brightness(calc(var(--art-base-brightness)*0.889134)) saturate(calc(var(--art-base-saturation)*1.058767)); }
+  62.50000% { filter:brightness(calc(var(--art-base-brightness)*0.915147)) saturate(calc(var(--art-base-saturation)*1.058730)); }
+  64.58333% { filter:brightness(calc(var(--art-base-brightness)*0.954078)) saturate(calc(var(--art-base-saturation)*1.053699)); }
+  66.66667% { filter:brightness(calc(var(--art-base-brightness)*1.000000)) saturate(calc(var(--art-base-saturation)*1.043897)); }
+  68.75000% { filter:brightness(calc(var(--art-base-brightness)*1.045922)) saturate(calc(var(--art-base-saturation)*1.029890)); }
+  70.83333% { filter:brightness(calc(var(--art-base-brightness)*1.084853)) saturate(calc(var(--art-base-saturation)*1.012552)); }
+  72.91667% { filter:brightness(calc(var(--art-base-brightness)*1.110866)) saturate(calc(var(--art-base-saturation)*0.993004)); }
+  75.00000% { filter:brightness(calc(var(--art-base-brightness)*1.120000)) saturate(calc(var(--art-base-saturation)*0.972544)); }
+  77.08333% { filter:brightness(calc(var(--art-base-brightness)*1.110866)) saturate(calc(var(--art-base-saturation)*0.952554)); }
+  79.16667% { filter:brightness(calc(var(--art-base-brightness)*1.084853)) saturate(calc(var(--art-base-saturation)*0.934408)); }
+  81.25000% { filter:brightness(calc(var(--art-base-brightness)*1.045922)) saturate(calc(var(--art-base-saturation)*0.919378)); }
+  83.33333% { filter:brightness(calc(var(--art-base-brightness)*1.000000)) saturate(calc(var(--art-base-saturation)*0.908548)); }
+  85.41667% { filter:brightness(calc(var(--art-base-brightness)*0.954078)) saturate(calc(var(--art-base-saturation)*0.902736)); }
+  87.50000% { filter:brightness(calc(var(--art-base-brightness)*0.915147)) saturate(calc(var(--art-base-saturation)*0.902442)); }
+  89.58333% { filter:brightness(calc(var(--art-base-brightness)*0.889134)) saturate(calc(var(--art-base-saturation)*0.907805)); }
+  91.66667% { filter:brightness(calc(var(--art-base-brightness)*0.880000)) saturate(calc(var(--art-base-saturation)*0.918597)); }
+  93.75000% { filter:brightness(calc(var(--art-base-brightness)*0.889134)) saturate(calc(var(--art-base-saturation)*0.934237)); }
+  95.83333% { filter:brightness(calc(var(--art-base-brightness)*0.915147)) saturate(calc(var(--art-base-saturation)*0.953822)); }
+  97.91667% { filter:brightness(calc(var(--art-base-brightness)*0.954078)) saturate(calc(var(--art-base-saturation)*0.976191)); }
+  100.00000% { filter:brightness(calc(var(--art-base-brightness)*1.000000)) saturate(calc(var(--art-base-saturation)*1.000000)); }
+}
 .echo-art__retry,.echo-art__sound { position:absolute; z-index:4; bottom:max(18px,env(safe-area-inset-bottom)); left:50%; transform:translateX(-50%); max-width:95%; background:#151515db; border:1px solid #d6c8b450; padding:9px 13px; color:#eee5d7; font:13px Arial,sans-serif; border-radius:4px; cursor:pointer; }
 .echo-art[data-playing="true"] .echo-art__sound { border-color:#d6c8b4; }
 .echo-art.is-missing,.echo-art--audio-only { height:52px; margin:10px 0; }
@@ -657,3 +717,9 @@
 .reader-screen:not(.settings-preview) .reader-toolbar:focus-within { opacity:1; pointer-events:auto; transform:none; }
 .reader-screen:not(.settings-preview) .reader-footer:focus-within { opacity:1; visibility:visible; pointer-events:auto; transform:none; }
 .reader-scroll:focus-visible { outline:2px solid #a48c70; outline-offset:-2px; }
+
+/* No motion still uses the approved neutral grade; reduced-motion never animates tint. */
+@media (prefers-reduced-motion:reduce) {
+  .echo-art--cover[data-mood="neutral"] .echo-art__picture img { filter:brightness(var(--art-base-brightness)) saturate(var(--art-base-saturation))!important; }
+  .echo-art__picture::after { animation:none!important; opacity:0!important; }
+}

@@ -63,7 +63,13 @@ export function createArtisticEngine(root, viewport, heading, text, onLayoutChan
     clearTimeout(idleTimer);
     root.dataset.artIdle = '0';
     if (!visible() || !motion()) return;
-    idleTimer = setTimeout(() => { if (visible() && motion() && entries.some(e => e.visible && e.image && !e.failed && e.scene.afterReveal === 'animate')) root.dataset.artIdle = '1'; }, 5000);
+    idleTimer = setTimeout(() => {
+      if (!visible() || !motion()) return;
+      const ready = entries.filter(e => e.breathable && e.image && !e.failed && e.scene.afterReveal === 'animate');
+      if (!ready.length) return;
+      ready.forEach(e => { e.node.dataset.breathing = 'true'; });
+      root.dataset.artIdle = '1';
+    }, 5000);
   }
   function measure(entry, r) {
     const b = entry.node.getBoundingClientRect();
@@ -77,7 +83,7 @@ export function createArtisticEngine(root, viewport, heading, text, onLayoutChan
     let entered = false;
     for (const e of entries) {
       const {ratio, b} = on && !e.node.hidden ? measure(e,r) : {ratio:0,b:null};
-      const was = e.visible;
+      const was = e.visible, wasBreathable = e.breathable;
       e.visible = ratio > .06;
       e.node.dataset.active = String(e.visible && motion());
       if (e.visible && e.image && !e.failed) {
@@ -87,7 +93,9 @@ export function createArtisticEngine(root, viewport, heading, text, onLayoutChan
         e.reveal = Math.max(e.reveal || 0,progress);
         e.node.style.setProperty('--reveal', String(motion() ? e.reveal : 1));
       } else if (!e.visible) { e.reveal = 0; e.node.style.setProperty('--reveal','0'); }
-      if (e.visible !== was) entered = true;
+      e.breathable = e.visible && ratio >= .6 && e.reveal >= .98 && motion() && !e.failed;
+      if (!e.visible || !motion() || e.failed) delete e.node.dataset.breathing;
+      if (e.visible !== was || e.breathable !== wasBreathable) entered = true;
       // A cue must leave almost entirely before it can fire on a new visit.
       if (on && ratio <= .04) { e.entered = false; if (currentAudio === e) stopAudio(); }
       if (ratio >= .55 && !e.entered && e.scene.audio) { e.entered = true; play(e); }
@@ -103,7 +111,7 @@ export function createArtisticEngine(root, viewport, heading, text, onLayoutChan
     node.dataset.mood = MOODS.has(scene.mood) ? scene.mood : 'neutral';
     node.dataset.effects = (scene.effects || []).join(' ');
     node.dataset.animate = String(scene.afterReveal === 'animate');
-    const entry = {node, scene, image:null, failed:false, visible:false, entered:false, reveal:0};
+    const entry = {node, scene, image:null, failed:false, visible:false, breathable:false, entered:false, reveal:0};
     if (scene.image) {
       const picture = document.createElement('div'); picture.className = 'echo-art__picture';
       const img = document.createElement('img'); img.alt = ''; img.draggable = false; img.decoding = 'async';
@@ -159,7 +167,7 @@ export function createArtisticEngine(root, viewport, heading, text, onLayoutChan
     if (audioElement) audioElement.volume=Math.max(0,Math.min(1,prefs.audioVolume/100));
     if (!soundEnabled(prefs)) stopAudio();resetIdle();schedule();
   }
-  function setActive(value) { active=value;if (!active) {stopAudio();for(const e of entries){e.entered=false;e.visible=false;e.node.dataset.active='false';}}resetIdle();schedule(); }
+  function setActive(value) { active=value;if (!active) {stopAudio();for(const e of entries){e.entered=false;e.visible=false;e.breathable=false;delete e.node.dataset.breathing;e.node.dataset.active='false';}}resetIdle();schedule(); }
   function setPaused(value) {paused=value;if (value) stopAudio();resetIdle();schedule();}
   function capture() {
     const r=viewport.getBoundingClientRect();

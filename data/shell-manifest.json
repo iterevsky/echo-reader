@@ -1,9 +1,9 @@
 {
-  "build": "echo-shell-2026-11-28-v16",
+  "build": "echo-shell-2026-11-28-v17",
   "files": [
     {
       "file": "index.html",
-      "sha256": "e4e8ba0b7cba058eb94d2d42bfaaf57196d5f112fed91a8b4ba95ee6e12032de",
+      "sha256": "7c6f2c6b4cb6d15b6bce8a10b7bc7e80edee501b3421ae159de226a4a94058df",
       "bytes": 28066
     },
     {
@@ -63,8 +63,8 @@
     },
     {
       "file": "styles/reader.css",
-      "sha256": "af4899a8d58d99a2f909448c6471140c8b56bb9afe3a78b07786c9b0f2fe6fae",
-      "bytes": 21435
+      "sha256": "d2a4708694a81b8a8ad1a7c778160a2969d2cb554e5c60a165be6107587ade88",
+      "bytes": 29392
     },
     {
       "file": "styles/settings.css",
@@ -118,8 +118,8 @@
     },
     {
       "file": "scripts/core/artistic-engine.js",
-      "sha256": "9852499ead5c277581367df69ae34182ea4dcb901075dcfb3cd80d25cfd0809f",
-      "bytes": 13270
+      "sha256": "5142c1ff504ade50c447a8f1fb1d7e02dca86e267f5220cc74b35d50d84574d1",
+      "bytes": 13722
     },
     {
       "file": "assets/illustrations/frontispiece-cool.webp",
