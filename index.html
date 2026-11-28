@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <meta name="echo-build" content="echo-shell-2026-11-28-v7-foundation">
+  <meta name="echo-build" content="echo-shell-2026-11-28-v8-reading">
   <meta name="theme-color" content="#111111">
   <meta name="description" content="ЭХО. Интерактивное книжное издание.">
   <link rel="manifest" href="./manifest.webmanifest?v=6">
@@ -141,6 +141,22 @@
           </header>
 
           <div class="reader-settings__body">
+            <label class="reader-setting" for="setting-reading-mode">
+              <span class="reader-setting__top"><span>Способ чтения</span></span>
+              <select id="setting-reading-mode" data-reading-mode>
+                <option value="scroll">Вертикальная прокрутка</option>
+                <option value="pages">Перелистывание страниц</option>
+              </select>
+            </label>
+            <label class="reader-setting" for="setting-page-animation">
+              <span class="reader-setting__top"><span>Анимация перелистывания</span></span>
+              <select id="setting-page-animation" data-page-animation>
+                <option value="slide">Горизонтальное скольжение</option>
+                <option value="fade">Плавное растворение</option>
+                <option value="none">Без анимации</option>
+              </select>
+            </label>
+
             <label class="reader-setting" for="setting-font-size">
               <span class="reader-setting__top"><span>Размер шрифта</span><output data-setting-value="fontSize">19</output></span>
               <input id="setting-font-size" type="range" min="16" max="30" step="1" data-setting="fontSize">

@@ -9,6 +9,7 @@ import {
 
 import { assignParagraphIds, locateParagraph, migrateLegacyAnchor, resolveReadingOffset } from '../core/anchors.js';
 import { loadArtwork } from '../core/artwork.js';
+import { createPagination } from '../core/pagination.js';
 
 const CONTROL_HIDE_DELAY = 3800;
 const SAVE_DELAY = 280;
@@ -32,6 +33,12 @@ export function createReaderScreen(root, { onBack, onCurrentChapterChanged, onSe
   const transitionTitle = root.querySelector('[data-transition-title]');
   const settingInputs = [...root.querySelectorAll('[data-setting]')];
   const alignmentButtons = [...root.querySelectorAll('[data-alignment]')];
+
+  const modeInput = root.querySelector('[data-reading-mode]');
+  const animationInput = root.querySelector('[data-page-animation]');
+  const pager = createPagination(scrollArea, root.querySelector('.reader-article'), textContainer);
+  const paged = () => root.dataset.readingMode === 'pages';
+  let suppressClickUntil = 0;
 
   let chapters = [];
   let currentIndex = -1;
@@ -99,6 +106,8 @@ export function createReaderScreen(root, { onBack, onCurrentChapterChanged, onSe
 
   function captureReadingAnchor() {
     if (!currentChapter || !textContainer.children.length) return null;
+    if (paged()) return pager.capture();
+    if (settingsOpen && lastKnownAnchor) return lastKnownAnchor;
 
     const paragraphs = getParagraphs();
     if (!paragraphs.length) return null;
@@ -146,6 +155,30 @@ export function createReaderScreen(root, { onBack, onCurrentChapterChanged, onSe
       }
     }
 
+    // A toolbar can obscure caretFromPoint. Resolve the line from text geometry.
+    if (textOffset === null && !isInTrailingSpace) {
+      let total = 0;
+      for (const node of getTextNodes(paragraph)) {
+        if (!node.length) continue;
+        const range = document.createRange();
+        const charRect = i => {
+          range.setStart(node, i); range.setEnd(node, i + 1);
+          return range.getBoundingClientRect();
+        };
+        if (charRect(node.length - 1).bottom > pointY) {
+          let lo = 0, hi = node.length - 1;
+          while (lo < hi) {
+            const mid = (lo + hi) >> 1;
+            if (charRect(mid).bottom <= pointY) lo = mid + 1; else hi = mid;
+          }
+          textOffset = total + lo;
+          viewportOffset = charRect(lo).top - viewport.top;
+          break;
+        }
+        total += node.length;
+      }
+    }
+
     const paragraphRatio = rect.height > 0
       ? Math.max(0, Math.min(1, (pointY - rect.top) / rect.height))
       : 0;
@@ -164,6 +197,7 @@ export function createReaderScreen(root, { onBack, onCurrentChapterChanged, onSe
 
   function restoreReadingAnchor(anchor) {
     if (!anchor) return false;
+    if (paged()) { pager.layout(anchor); return true; }
 
     const paragraphs = getParagraphs();
     if (anchor.atStart) { scrollArea.scrollTop = 0; return true; }
@@ -225,7 +259,7 @@ export function createReaderScreen(root, { onBack, onCurrentChapterChanged, onSe
     if (!currentChapter || restoringPosition || !root.classList.contains('is-active')) return;
 
     const last = textContainer.lastElementChild;
-    const reachedEnd = last && last.getBoundingClientRect().bottom <= scrollArea.getBoundingClientRect().bottom + 18;
+    const reachedEnd = paged() ? pager.atEnd() : last && last.getBoundingClientRect().bottom <= scrollArea.getBoundingClientRect().bottom + 18;
     if (reachedEnd) {
       markChapterRead(currentChapter.id);
       onCurrentChapterChanged?.(currentChapter);
@@ -238,6 +272,9 @@ export function createReaderScreen(root, { onBack, onCurrentChapterChanged, onSe
   }
 
   function applyReaderSettings(settings) {
+    root.dataset.readingMode = settings.readingMode;
+    modeInput.value = settings.readingMode;
+    animationInput.value = settings.pageAnimation;
     root.style.setProperty('--reader-font-size', `${settings.fontSize}px`);
     root.style.setProperty('--reader-line-height', String(settings.lineHeight));
     root.style.setProperty('--reader-paragraph-spacing', `${settings.paragraphSpacing}em`);
@@ -294,7 +331,7 @@ export function createReaderScreen(root, { onBack, onCurrentChapterChanged, onSe
   function openSettings() {
     if (settingsOpen) return;
 
-    savePosition();
+    if (!lastKnownAnchor || saveTimer !== null) savePosition();
     settingsOpen = true;
     root.classList.add('settings-preview');
     previousFocusedElement = document.activeElement;
@@ -327,7 +364,7 @@ export function createReaderScreen(root, { onBack, onCurrentChapterChanged, onSe
     updateNavigationButtons();
   }
 
-  async function openChapter(chapter, { restorePosition = true } = {}) {
+  async function openChapter(chapter, { restorePosition = true, startAtEnd = false } = {}) {
     const index = chapters.findIndex((item) => item.id === chapter.id);
     if (index < 0) {
       throw new Error('Выбранная глава отсутствует в каталоге.');
@@ -368,7 +405,7 @@ export function createReaderScreen(root, { onBack, onCurrentChapterChanged, onSe
     const sourceId = sourceArticle.getAttribute('data-chapter-id');
     if (sourceId && sourceId !== chapter.id) throw new Error('Файл не соответствует выбранной главе.');
     const firstText = sourceArticle.querySelector(':scope > p')?.textContent || '';
-    targetAnchor = targetPosition <= 1 ? null : migrateLegacyAnchor(targetAnchor, firstText, chapter.title);
+    if (targetAnchor?.version !== 2) targetAnchor = targetPosition <= 1 ? null : migrateLegacyAnchor(targetAnchor, firstText, chapter.title);
     const paragraphs = assignParagraphIds(sourceArticle);
     if (!paragraphs.length) throw new Error('В главе отсутствует текст.');
     // Optional metadata must never delay or prevent normal reading.
@@ -415,7 +452,9 @@ export function createReaderScreen(root, { onBack, onCurrentChapterChanged, onSe
     await new Promise(resolve => requestAnimationFrame(resolve));
     if (requestId !== chapterRequest) return false;
     {
-        if (targetAnchor) {
+        if (paged()) {
+          pager.layout(targetAnchor, startAtEnd);
+        } else if (targetAnchor) {
           const restored = restoreReadingAnchor(targetAnchor);
           if (!restored) scrollArea.scrollTop = targetPosition;
         } else {
@@ -451,6 +490,7 @@ export function createReaderScreen(root, { onBack, onCurrentChapterChanged, onSe
   function cancelPending() {
     ++chapterRequest;
     ++moveGeneration;
+    pager.stop();
     restoringPosition = false;
     isNavigating = false;
     if (saveTimer !== null) { window.clearTimeout(saveTimer); saveTimer = null; }
@@ -460,7 +500,7 @@ export function createReaderScreen(root, { onBack, onCurrentChapterChanged, onSe
     updateNavigationButtons();
   }
 
-  async function moveTo(index, direction) {
+  async function moveTo(index, direction, startAtEnd = false) {
     if (isNavigating || index < 0 || index >= chapters.length || index === currentIndex) return;
     const target = chapters[index];
     const generation = ++moveGeneration;
@@ -482,7 +522,7 @@ export function createReaderScreen(root, { onBack, onCurrentChapterChanged, onSe
     if (generation !== moveGeneration || !root.classList.contains('is-active')) return;
 
     try {
-      const opened = await openChapter(target, { restorePosition: false });
+      const opened = await openChapter(target, { restorePosition: false, startAtEnd });
       if (!opened || generation !== moveGeneration) return;
       requestAnimationFrame(() => {
         if (generation !== moveGeneration) return;
@@ -507,17 +547,33 @@ export function createReaderScreen(root, { onBack, onCurrentChapterChanged, onSe
   }
 
   function applyLiveSettings(update) {
-    const atTop = scrollArea.scrollTop <= 1;
     const anchor = captureReadingAnchor() || lastKnownAnchor;
+    const wasPaged = paged();
     const updated = update();
     applyReaderSettings(updated.readerSettings);
-    // Restore synchronously after the new layout is calculated, so rapid input
-    // events cannot queue stale reading positions or visibly jump the text.
-    if (atTop) scrollArea.scrollTop = 0;
-    else if (anchor) restoreReadingAnchor(anchor);
+    if (paged()) pager.layout(anchor);
+    else {
+      if (wasPaged) pager.disable();
+      if (anchor) restoreReadingAnchor(anchor);
+      else scrollArea.scrollTop = 0;
+    }
     lastKnownAnchor = captureReadingAnchor() || anchor;
     savePosition();
   }
+
+  function turnPage(delta) {
+    if (!paged() || settingsOpen || restoringPosition || isNavigating) return;
+    hideControls();
+    if (pager.turn(delta, getState().readerSettings.pageAnimation)) {
+      savePosition();
+      markReadAtEnd();
+    } else {
+      moveTo(currentIndex + delta, delta > 0 ? 'next' : 'previous', delta < 0);
+    }
+  }
+
+  modeInput.addEventListener('change', () => applyLiveSettings(() => updateReaderSettings({readingMode: modeInput.value})));
+  animationInput.addEventListener('change', () => applyLiveSettings(() => updateReaderSettings({pageAnimation: animationInput.value})));
 
   function handleSettingChange(input) {
     const key = input.dataset.setting;
@@ -562,7 +618,7 @@ export function createReaderScreen(root, { onBack, onCurrentChapterChanged, onSe
   });
 
   scrollArea.addEventListener('scroll', () => {
-    if (restoringPosition || !root.classList.contains('is-active')) return;
+    if (paged() || restoringPosition || !root.classList.contains('is-active')) return;
     if (!settingsOpen && root.classList.contains('controls-visible')) hideControls();
     if (saveTimer !== null) window.clearTimeout(saveTimer);
 
@@ -575,7 +631,13 @@ export function createReaderScreen(root, { onBack, onCurrentChapterChanged, onSe
   }, { passive: true });
 
   scrollArea.addEventListener('click', (event) => {
-    if (settingsOpen || event.target.closest('button, a')) return;
+    if (settingsOpen || Date.now() < suppressClickUntil || event.target.closest('button, a, input, select') || window.getSelection()?.toString()) return;
+    if (paged()) {
+      const r = scrollArea.getBoundingClientRect();
+      const x = (event.clientX - r.left) / r.width;
+      if (x < .30) { turnPage(-1); return; }
+      if (x > .70) { turnPage(1); return; }
+    }
 
     if (root.classList.contains('controls-visible')) {
       hideControls();
@@ -609,6 +671,17 @@ export function createReaderScreen(root, { onBack, onCurrentChapterChanged, onSe
     const deltaY = touch.clientY - touchStart.y;
     const start = touchStart;
     touchStart = null;
+
+    if (paged()) {
+      const r = scrollArea.getBoundingClientRect();
+      // Leave system edge-back gestures to the browser and OS.
+      if (start.x - r.left < 24 || r.right - start.x < 24) return;
+      if (Math.abs(deltaX) >= 48 && Math.abs(deltaX) > Math.abs(deltaY) * 1.25 && !window.getSelection()?.toString()) {
+        suppressClickUntil = Date.now() + 350;
+        turnPage(deltaX < 0 ? 1 : -1);
+      }
+      return;
+    }
 
     if (Math.abs(deltaY) < SWIPE_THRESHOLD || Math.abs(deltaY) < Math.abs(deltaX) * 1.25) return;
 

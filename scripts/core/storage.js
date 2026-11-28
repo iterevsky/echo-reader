@@ -9,7 +9,9 @@ export const DEFAULT_READER_SETTINGS = Object.freeze({
   paragraphSpacing: 1.08,
   pageMargin: 26,
   textWidth: 690,
-  alignment: 'left'
+  alignment: 'left',
+  readingMode: 'scroll',
+  pageAnimation: 'slide'
 });
 
 const DEFAULT_STATE = {
@@ -39,6 +41,8 @@ function normalizeReaderSettings(value) {
     paragraphSpacing: clamp(source.paragraphSpacing, 0.5, 1.8, DEFAULT_READER_SETTINGS.paragraphSpacing),
     pageMargin: clamp(source.pageMargin, 14, 56, DEFAULT_READER_SETTINGS.pageMargin),
     textWidth: clamp(source.textWidth, 520, 900, DEFAULT_READER_SETTINGS.textWidth),
+    readingMode: source.readingMode === 'pages' ? 'pages' : 'scroll',
+    pageAnimation: ['slide', 'fade', 'none'].includes(source.pageAnimation) ? source.pageAnimation : 'slide',
     alignment: VALID_ALIGNMENTS.has(source.alignment)
       ? source.alignment
       : DEFAULT_READER_SETTINGS.alignment

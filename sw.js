@@ -1,5 +1,5 @@
 /* ЭХО: Service Worker. BUILD_ID меняется при выпуске обновления оболочки. */
-const BUILD_ID = 'echo-shell-2026-11-28-v7-foundation';
+const BUILD_ID = 'echo-shell-2026-11-28-v8-reading';
 const SHELL_CACHE = `echo-shell-${BUILD_ID}`;
 const META_CACHE = 'echo-meta-v1';
 const BOOTSTRAP_CACHE = 'echo-content-bootstrap-v1';
@@ -26,6 +26,7 @@ const coreFiles = [
   'scripts/core/storage.js',
   'scripts/core/navigation.js',
   'scripts/core/anchors.js',
+  'scripts/core/pagination.js',
   'scripts/core/artwork.js',
   'scripts/core/offline.js',
   'scripts/screens/contents.js',

@@ -576,3 +576,24 @@
     transition: none; transform: none;
   }
 }
+
+/* The article is one continuous DOM; fixed-height columns form the pages. */
+.reader-screen[data-reading-mode="pages"] .reader-scroll {
+  overflow: clip;
+  padding-top: max(var(--reader-page-margin), calc(env(safe-area-inset-top) + 12px));
+  padding-bottom: max(var(--reader-page-margin), calc(env(safe-area-inset-bottom) + 12px));
+  touch-action: pan-y pinch-zoom;
+}
+.reader-screen[data-reading-mode="pages"] .reader-article {
+  height: var(--page-height, 100%);
+  column-count: 1;
+  column-gap: var(--page-gap, 52px);
+  column-fill: auto;
+}
+.reader-screen[data-reading-mode="pages"] .reader-chapter-heading { break-inside: avoid; }
+.reader-screen[data-reading-mode="pages"] .reader-end-note { display: none; }
+.reader-setting select {
+  width: 100%; min-height: 40px; padding: 6px 8px;
+  color: inherit; background: #211e1b; border: 1px solid #62594f;
+  border-radius: 3px; font: 13px Arial, sans-serif;
+}
