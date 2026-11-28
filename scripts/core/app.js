@@ -1,4 +1,5 @@
 import { getState } from './storage.js';
+import { createNavigation } from './navigation.js';
 import { activatePendingContentVersion, registerServiceWorker, startOfflineManager } from './offline.js';
 import { createContentsScreen } from '../screens/contents.js';
 import { createReaderScreen } from '../screens/reader.js';
@@ -26,6 +27,8 @@ import { createReaderScreen } from '../screens/reader.js';
   let pendingShellBuild = null;
   let shellReloading = false;
   let openingChapter = false;
+  let navigationEpoch = 0;
+  const navigation = createNavigation(route => { renderRoute(route).catch(showNavigationError); });
   const SHELL_BUILD = document.querySelector('meta[name="echo-build"]')?.content;
   const SHELL_RESUME_KEY = "echo-shell-resume-v1";
   const SHELL_RELOAD_KEY = "echo-shell-reload-v1";
@@ -119,29 +122,114 @@ import { createReaderScreen } from '../screens/reader.js';
 
   let reader;
 
-  const contents = createContentsScreen(contentsRoot, async (chapter) => {
+  function showNavigationError(error) {
+    console.error('ЭХО: ошибка навигации.', error);
+    window.alert('Не удалось открыть книгу. ' + error.message);
+  }
+
+  const contents = createContentsScreen(contentsRoot, async chapter => {
+    if (openingChapter || navigation.current()?.screen !== 'contents') return;
+    const epoch = ++navigationEpoch;
     openingChapter = true;
     try {
+      const opened = await reader.openChapter(chapter, { restorePosition: true });
+      if (!opened || epoch !== navigationEpoch) return;
+      navigation.push('reader', chapter.id);
       contents.hide();
-      await reader.openChapter(chapter, { restorePosition: true });
       reader.show();
+      phase = 'reading';
     } catch (error) {
-      contents.show();
-      console.error('ЭХО: не удалось открыть главу.', error);
-      window.alert(`Не удалось открыть главу ${chapter.number}.\n${error.message}`);
+      if (epoch === navigationEpoch) { reader.hide(); contents.show(); showNavigationError(error); }
     } finally {
-      openingChapter = false;
-      applyShellUpdateIfSafe();
+      if (epoch === navigationEpoch) { openingChapter = false; applyShellUpdateIfSafe(); }
     }
   });
 
   reader = createReaderScreen(readerRoot, {
-    onBack: () => {
-      contents.show();
-      applyShellUpdateIfSafe();
+    onBack: () => navigation.back(),
+    onSettingsOpen: () => {
+      const chapter = reader.getCurrentChapter();
+      if (chapter && navigation.current()?.screen === 'reader') {
+        navigation.push('settings', chapter.id);
+        reader.openSettings();
+      }
     },
-    onCurrentChapterChanged: () => contents.refreshState()
+    onSettingsClose: () => {
+      if (navigation.current()?.screen === 'settings') navigation.back();
+      else reader.closeSettings();
+    },
+    onCurrentChapterChanged: chapter => {
+      contents.refreshState();
+      if (navigation.current()?.screen === 'reader' && chapter) navigation.replace('reader', chapter.id);
+    }
   });
+
+  function hideSplashImmediately() {
+    clearTimers();
+    splash.hidden = true;
+    splash.inert = true;
+  }
+
+  function returnToSplash() {
+    reader.hide();
+    contents.hide();
+    clearTimers();
+    splash.hidden = false;
+    splash.inert = false;
+    splash.dataset.phase = 'waiting';
+    splash.dataset.idle = '0';
+    splash.querySelector('.splash__tap-hint')?.removeAttribute('hidden');
+    title.setAttribute('aria-hidden', 'true');
+    tapButton.disabled = false;
+    tapButton.setAttribute('aria-label', 'Показать название книги');
+    phase = 'waiting';
+  }
+
+  async function renderRoute(route) {
+    const epoch = ++navigationEpoch;
+    openingChapter = false;
+    if (route.screen === 'splash') { returnToSplash(); applyShellUpdateIfSafe(); return; }
+
+    const chapter = reader.getCurrentChapter();
+    if (['reader','settings'].includes(route.screen) && chapter?.id === route.chapterId &&
+        readerRoot.classList.contains('is-active')) {
+      if (route.screen === 'settings') reader.openSettings();
+      else reader.closeSettings();
+      phase = 'reading';
+      return;
+    }
+
+    reader.hide();
+    openingChapter = true;
+    try {
+      const chapters = await ensureCatalog();
+      if (epoch !== navigationEpoch) return;
+      hideSplashImmediately();
+      if (route.screen === 'contents') {
+        contents.show();
+        phase = 'contents';
+        return;
+      }
+      const selected = chapters.find(item => item.id === route.chapterId);
+      if (!selected) throw new Error('Глава отсутствует в каталоге.');
+      const opened = await reader.openChapter(selected, { restorePosition: true });
+      if (!opened || epoch !== navigationEpoch) return;
+      contents.hide();
+      reader.show();
+      phase = 'reading';
+      if (route.screen === 'settings') reader.openSettings();
+    } catch (error) {
+      if (epoch !== navigationEpoch) return;
+      reader.hide();
+      navigation.replace('contents');
+      hideSplashImmediately();
+      contents.show();
+      phase = 'contents';
+      showNavigationError(error);
+    } finally {
+      if (epoch === navigationEpoch) { openingChapter = false; applyShellUpdateIfSafe(); }
+    }
+  }
 
   async function ensureCatalog() {
     await pendingActivationPromise;
@@ -213,52 +301,49 @@ import { createReaderScreen } from '../screens/reader.js';
     startIdleSequence();
   }
 
-  async function prepareDestination() {
-    const chapters = await ensureCatalog();
-    const state = getState();
-
-    if (state.currentChapterId) {
-      const savedChapter = chapters.find((chapter) => chapter.id === state.currentChapterId);
-      if (savedChapter) {
-        await reader.openChapter(savedChapter, { restorePosition: true });
-        reader.show();
-        return;
-      }
-    }
-
-    contents.show();
-  }
-
   async function leaveSplash() {
     if (phase !== 'title-visible') return;
-
+    const epoch = ++navigationEpoch;
+    openingChapter = true;
     phase = 'preparing-destination';
     splash.querySelector('.splash__tap-hint')?.setAttribute('hidden', '');
     clearTimers();
     tapButton.disabled = true;
-
     try {
-      await prepareDestination();
+      const chapters = await ensureCatalog();
+      if (epoch !== navigationEpoch) return;
+      navigation.push('contents');
+      const saved = chapters.find(chapter => chapter.id === getState().currentChapterId);
+      if (saved) {
+        try {
+          const opened = await reader.openChapter(saved, { restorePosition: true });
+          if (epoch !== navigationEpoch || !opened) return;
+          navigation.push('reader', saved.id);
+          contents.hide();
+          reader.show();
+        } catch (error) {
+          if (epoch !== navigationEpoch) return;
+          reader.hide();
+          contents.show();
+          showNavigationError(error);
+        }
+      } else contents.show();
+      phase = 'leaving';
+      splash.dataset.phase = 'leaving';
+      tapButton.setAttribute('aria-label', 'Переход');
+      transitionTimer = window.setTimeout(() => {
+        if (epoch !== navigationEpoch) return;
+        hideSplashImmediately();
+        phase = readerRoot.classList.contains('is-active') ? 'reading' : 'contents';
+        applyShellUpdateIfSafe();
+      }, 1850);
     } catch (error) {
-      console.error('ЭХО: не удалось подготовить следующий экран.', error);
-      contentsRoot.classList.add('is-active');
-      contentsRoot.inert = false;
-      contentsRoot.setAttribute('aria-hidden', 'false');
-      contentsRoot.querySelector('[data-contents-loading]').textContent =
-        'Не удалось загрузить содержание. Проверь наличие data/chapters.json и перезапусти страницу.';
+      if (epoch !== navigationEpoch) return;
+      returnToSplash();
+      showNavigationError(error);
+    } finally {
+      if (epoch === navigationEpoch) openingChapter = false;
     }
-
-    phase = 'leaving';
-    splash.dataset.phase = 'leaving';
-    tapButton.setAttribute('aria-label', 'Переход');
-
-    transitionTimer = window.setTimeout(() => {
-      splash.hidden = true;
-      splash.inert = true;
-      transitionTimer = null;
-      phase = readerRoot.classList.contains('is-active') ? 'reading' : 'contents';
-      applyShellUpdateIfSafe();
-    }, 1850);
   }
 
   function handleSplashTap() {
@@ -274,18 +359,15 @@ import { createReaderScreen } from '../screens/reader.js';
 
   tapButton.addEventListener('click', handleSplashTap);
 
-  // Возвращаем экран, на котором была безопасно применена новая оболочка.
-  if (shellResume?.screen === 'title-visible') {
+  // Restore a managed history entry without creating duplicate history entries.
+  const initialRoute = navigation.initial;
+  if (initialRoute && initialRoute.screen !== 'splash') {
+    renderRoute(initialRoute).catch(showNavigationError);
+  } else if (shellResume?.screen === 'title-visible') {
     showTitle();
   } else if (shellResume?.screen === 'contents') {
-    phase = 'preparing-destination';
-    ensureCatalog().then(() => {
-      contents.show();
-      splash.hidden = true;
-      splash.inert = true;
-      phase = 'contents';
-      applyShellUpdateIfSafe();
-    }).catch(() => { phase = 'waiting'; });
+    navigation.replace('contents');
+    renderRoute({ screen: 'contents' }).catch(showNavigationError);
   }
   checkShellUpdate(true);
 

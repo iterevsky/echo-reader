@@ -187,6 +187,9 @@ export function createContentsScreen(root, onOpenChapter) {
     root.setAttribute('aria-hidden', 'false');
     root.classList.add('is-active');
     updateCurrentAndReadStates();
+    const id = getState().currentChapterId;
+    const current = [...list.querySelectorAll('[data-chapter-id]')].find(button => button.dataset.chapterId === id);
+    if (current) current.scrollIntoView({ block: 'nearest', behavior: 'instant' });
     updateRangeFromScroll();
   }
 

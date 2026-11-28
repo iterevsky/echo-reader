@@ -7,12 +7,15 @@ import {
   markChapterRead
 } from '../core/storage.js';
 
+import { assignParagraphIds, locateParagraph, migrateLegacyAnchor } from '../core/anchors.js';
+import { loadArtwork } from '../core/artwork.js';
+
 const CONTROL_HIDE_DELAY = 3800;
 const SAVE_DELAY = 280;
 const SWIPE_THRESHOLD = 78;
 const TRANSITION_DELAY = 430;
 
-export function createReaderScreen(root, { onBack, onCurrentChapterChanged }) {
+export function createReaderScreen(root, { onBack, onCurrentChapterChanged, onSettingsOpen, onSettingsClose }) {
   const scrollArea = root.querySelector('#reader-scroll');
   const numberHeading = root.querySelector('#reader-chapter-number');
   const titleHeading = root.querySelector('#reader-chapter-title');
@@ -43,6 +46,8 @@ export function createReaderScreen(root, { onBack, onCurrentChapterChanged }) {
   let resizeTimer = null;
   let touchStart = null;
   let isNavigating = false;
+  let restoringPosition = false;
+  let moveGeneration = 0;
 
   function getParagraphs() {
     return [...textContainer.querySelectorAll('p')];
@@ -97,6 +102,9 @@ export function createReaderScreen(root, { onBack, onCurrentChapterChanged }) {
 
     const paragraphs = getParagraphs();
     if (!paragraphs.length) return null;
+    if (scrollArea.scrollTop <= 1) return { version: 2, atStart: true,
+      paragraphIndex: 0, paragraphId: paragraphs[0].getAttribute('data-echo-anchor'),
+      textOffset: 0, paragraphRatio: 0, viewportOffset: 24 };
 
     const viewport = scrollArea.getBoundingClientRect();
     const targetY = viewport.top + 24;
@@ -143,6 +151,9 @@ export function createReaderScreen(root, { onBack, onCurrentChapterChanged }) {
       : 0;
 
     return {
+      version: 2,
+      paragraphId: paragraph.getAttribute('data-echo-anchor'),
+      quote: paragraph.textContent.slice(Math.max(0, (textOffset || 0) - 20), (textOffset || 0) + 80),
       paragraphIndex,
       textOffset,
       paragraphRatio,
@@ -154,7 +165,8 @@ export function createReaderScreen(root, { onBack, onCurrentChapterChanged }) {
     if (!anchor) return false;
 
     const paragraphs = getParagraphs();
-    const paragraph = paragraphs[anchor.paragraphIndex];
+    if (anchor.atStart) { scrollArea.scrollTop = 0; return true; }
+    const paragraph = locateParagraph(paragraphs, anchor);
     if (!paragraph) return false;
 
     const viewport = scrollArea.getBoundingClientRect();
@@ -195,7 +207,7 @@ export function createReaderScreen(root, { onBack, onCurrentChapterChanged }) {
   }
 
   function savePosition() {
-    if (!currentChapter) return;
+    if (!currentChapter || restoringPosition || !root.classList.contains('is-active')) return;
 
     const anchor = captureReadingAnchor() || lastKnownAnchor;
     if (anchor) lastKnownAnchor = anchor;
@@ -209,9 +221,10 @@ export function createReaderScreen(root, { onBack, onCurrentChapterChanged }) {
   }
 
   function markReadAtEnd() {
-    if (!currentChapter) return;
+    if (!currentChapter || restoringPosition || !root.classList.contains('is-active')) return;
 
-    const reachedEnd = scrollArea.scrollTop + scrollArea.clientHeight >= scrollArea.scrollHeight - 18;
+    const last = textContainer.lastElementChild;
+    const reachedEnd = last && last.getBoundingClientRect().bottom <= scrollArea.getBoundingClientRect().bottom + 18;
     if (reachedEnd) {
       markChapterRead(currentChapter.id);
       onCurrentChapterChanged?.(currentChapter);
@@ -327,7 +340,7 @@ export function createReaderScreen(root, { onBack, onCurrentChapterChanged }) {
     const isSameChapter = previousState.currentChapterId === chapter.id;
     const mayRestore = restorePosition && isSameChapter;
     const targetPosition = mayRestore ? previousState.lastScrollTop : 0;
-    const targetAnchor = mayRestore ? previousState.readingAnchor : null;
+    let targetAnchor = mayRestore ? previousState.readingAnchor : null;
     const requestId = ++chapterRequest;
 
     let response;
@@ -349,26 +362,18 @@ export function createReaderScreen(root, { onBack, onCurrentChapterChanged }) {
       throw new Error(`В файле главы ${chapter.number} не найден текстовый блок.`);
     }
 
-    if (requestId !== chapterRequest) return;
+    if (requestId !== chapterRequest) return false;
 
-    let displayedTitle = chapter.title;
-    const firstParagraph = sourceArticle.querySelector(':scope > p');
-    if (firstParagraph) {
-      const firstText = firstParagraph.textContent || '';
-      if (firstText.startsWith(chapter.title)) {
-        const remainder = firstText.slice(chapter.title.length);
-        const punctuation = remainder.match(/^[.!?…:;]+/)?.[0] || '';
-
-        if (punctuation) {
-          displayedTitle = chapter.title + punctuation;
-          const bodyRemainder = remainder.slice(punctuation.length).replace(/^\s+/, '');
-          if (bodyRemainder) {
-            firstParagraph.textContent = bodyRemainder;
-          } else {
-            firstParagraph.remove();
-          }
-        }
-      }
+    const sourceId = sourceArticle.getAttribute('data-chapter-id');
+    if (sourceId && sourceId !== chapter.id) throw new Error('Файл не соответствует выбранной главе.');
+    const firstText = sourceArticle.querySelector(':scope > p')?.textContent || '';
+    targetAnchor = migrateLegacyAnchor(targetAnchor, firstText, chapter.title);
+    const paragraphs = assignParagraphIds(sourceArticle);
+    if (!paragraphs.length) throw new Error('В главе отсутствует текст.');
+    // Optional metadata must never delay or prevent normal reading.
+    if (chapter.artwork) {
+      const ids = new Set(paragraphs.map(p => p.getAttribute('data-echo-anchor')));
+      loadArtwork(chapter, ids).catch(error => console.warn('ЭХО: художественная разметка недоступна.', error));
     }
 
     const safeNodes = [...sourceArticle.childNodes]
@@ -380,12 +385,15 @@ export function createReaderScreen(root, { onBack, onCurrentChapterChanged }) {
 
     // Commit only after successful fetch + parse. A broken target chapter
     // must never replace the last known-good chapter or its saved position.
+    restoringPosition = true;
+    if (saveTimer !== null) { window.clearTimeout(saveTimer); saveTimer = null; }
     currentIndex = index;
     currentChapter = chapter;
     lastKnownAnchor = targetAnchor;
     updateNavigationButtons();
     numberHeading.textContent = `Глава ${chapter.number}`;
-    titleHeading.textContent = displayedTitle;
+    titleHeading.textContent = '';
+    titleHeading.hidden = true;
     textContainer.replaceChildren(...safeNodes);
 
     updateState({
@@ -400,9 +408,12 @@ export function createReaderScreen(root, { onBack, onCurrentChapterChanged }) {
     root.setAttribute('aria-hidden', 'false');
     root.classList.add('is-active');
 
-    requestAnimationFrame(() => {
-      scrollArea.scrollTop = 0;
-      requestAnimationFrame(() => {
+    await new Promise(resolve => requestAnimationFrame(resolve));
+    if (requestId !== chapterRequest) return false;
+    scrollArea.scrollTop = 0;
+    await new Promise(resolve => requestAnimationFrame(resolve));
+    if (requestId !== chapterRequest) return false;
+    {
         if (targetAnchor) {
           const restored = restoreReadingAnchor(targetAnchor);
           if (!restored) scrollArea.scrollTop = targetPosition;
@@ -411,10 +422,12 @@ export function createReaderScreen(root, { onBack, onCurrentChapterChanged }) {
         }
 
         lastKnownAnchor = captureReadingAnchor();
+        restoringPosition = false;
+        savePosition();
         showControls();
         markReadAtEnd();
-      });
-    });
+    }
+    return true;
   }
 
   function show() {
@@ -427,34 +440,49 @@ export function createReaderScreen(root, { onBack, onCurrentChapterChanged }) {
   function hide() {
     savePosition();
     closeSettings();
+    cancelPending();
     root.classList.remove('is-active', 'controls-visible');
     root.setAttribute('aria-hidden', 'true');
     root.inert = true;
     hideControls();
   }
 
+  function cancelPending() {
+    ++chapterRequest;
+    ++moveGeneration;
+    restoringPosition = false;
+    isNavigating = false;
+    if (saveTimer !== null) { window.clearTimeout(saveTimer); saveTimer = null; }
+    if (resizeTimer !== null) { window.clearTimeout(resizeTimer); resizeTimer = null; }
+    transitionLayer.classList.remove('is-visible');
+    transitionLayer.setAttribute('aria-hidden', 'true');
+    updateNavigationButtons();
+  }
+
   async function moveTo(index, direction) {
     if (isNavigating || index < 0 || index >= chapters.length || index === currentIndex) return;
     const target = chapters[index];
+    const generation = ++moveGeneration;
     isNavigating = true;
     previousButton.disabled = true;
     nextButton.disabled = true;
 
     savePosition();
     transitionDirection.textContent = direction === 'next' ? 'Следующая глава' : 'Предыдущая глава';
-    transitionTitle.textContent = target.title;
+    transitionTitle.textContent = `Глава ${target.number}`;
     transitionLayer.classList.add('is-visible');
     transitionLayer.setAttribute('aria-hidden', 'false');
 
-    if (transitionTimer !== null) window.clearTimeout(transitionTimer);
-
+    // Each pending move owns its timer; cancellation is handled by its generation.
     await new Promise((resolve) => {
       transitionTimer = window.setTimeout(resolve, TRANSITION_DELAY);
     });
     transitionTimer = null;
+    if (generation !== moveGeneration || !root.classList.contains('is-active')) return;
 
     try {
-      await openChapter(target, { restorePosition: false });
+      const opened = await openChapter(target, { restorePosition: false });
+      if (!opened || generation !== moveGeneration) return;
       requestAnimationFrame(() => {
         transitionLayer.classList.remove('is-visible');
         window.setTimeout(() => {
@@ -462,6 +490,7 @@ export function createReaderScreen(root, { onBack, onCurrentChapterChanged }) {
         }, 420);
       });
     } catch (error) {
+      if (generation !== moveGeneration) return;
       // Failed navigation must leave the previous, already saved chapter intact.
       transitionDirection.textContent = 'Не удалось перейти';
       transitionTitle.textContent = 'Остаёмся в текущей главе';
@@ -470,8 +499,7 @@ export function createReaderScreen(root, { onBack, onCurrentChapterChanged }) {
       transitionLayer.classList.remove('is-visible');
       transitionLayer.setAttribute('aria-hidden', 'true');
     } finally {
-      isNavigating = false;
-      updateNavigationButtons();
+      if (generation === moveGeneration) { isNavigating = false; updateNavigationButtons(); }
     }
   }
 
@@ -497,18 +525,17 @@ export function createReaderScreen(root, { onBack, onCurrentChapterChanged }) {
 
   backButton.addEventListener('click', () => {
     savePosition();
-    hide();
     onBack?.();
   });
 
-  settingsButton.addEventListener('click', openSettings);
+  settingsButton.addEventListener('click', () => { if (!settingsOpen) onSettingsOpen?.(); });
   previousButton.addEventListener('click', () => moveTo(currentIndex - 1, 'previous'));
   nextButton.addEventListener('click', () => moveTo(currentIndex + 1, 'next'));
 
-  settingsCloseButtons.forEach((button) => button.addEventListener('click', closeSettings));
+  settingsCloseButtons.forEach((button) => button.addEventListener('click', () => onSettingsClose?.()));
 
   settingsBackdrop.addEventListener('click', (event) => {
-    if (event.target === settingsBackdrop) closeSettings();
+    if (event.target === settingsBackdrop) onSettingsClose?.();
   });
 
   settingsResetButton.addEventListener('click', () => {
@@ -527,11 +554,12 @@ export function createReaderScreen(root, { onBack, onCurrentChapterChanged }) {
 
   root.addEventListener('keydown', (event) => {
     if (event.key === 'Escape' && settingsOpen) {
-      closeSettings();
+      onSettingsClose?.();
     }
   });
 
   scrollArea.addEventListener('scroll', () => {
+    if (restoringPosition || !root.classList.contains('is-active')) return;
     if (!settingsOpen && root.classList.contains('controls-visible')) hideControls();
     if (saveTimer !== null) window.clearTimeout(saveTimer);
 
@@ -597,7 +625,7 @@ export function createReaderScreen(root, { onBack, onCurrentChapterChanged }) {
     const anchor = lastKnownAnchor;
 
     resizeTimer = window.setTimeout(() => {
-      if (anchor && currentChapter) {
+      if (anchor && currentChapter && !restoringPosition && root.classList.contains('is-active')) {
         restoreReadingAnchor(anchor);
         lastKnownAnchor = captureReadingAnchor() || anchor;
         savePosition();
@@ -620,6 +648,10 @@ export function createReaderScreen(root, { onBack, onCurrentChapterChanged }) {
     setChapters,
     openChapter,
     show,
-    hide
+    hide,
+    cancelPending,
+    openSettings,
+    closeSettings,
+    getCurrentChapter: () => currentChapter
   };
 }

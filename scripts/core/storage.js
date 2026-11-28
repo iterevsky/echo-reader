@@ -56,6 +56,10 @@ function normalizeAnchor(value) {
   if (paragraphIndex === null) return null;
 
   return {
+    version: value.version === 2 ? 2 : 1,
+    paragraphId: typeof value.paragraphId === 'string' ? value.paragraphId.slice(0, 200) : null,
+    quote: typeof value.quote === 'string' ? value.quote.slice(0, 160) : null,
+    atStart: value.atStart === true,
     paragraphIndex,
     textOffset,
     paragraphRatio: clamp(value.paragraphRatio, 0, 1, 0),
@@ -92,7 +96,9 @@ function normalizeState(value) {
 function parseStoredValue(raw) {
   if (!raw) return null;
   try {
-    return normalizeState(JSON.parse(raw));
+    const parsed = JSON.parse(raw);
+    if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) return null;
+    return normalizeState(parsed);
   } catch {
     return null;
   }
@@ -170,4 +176,10 @@ export function markChapterRead(chapterId) {
   return updateState({
     readChapterIds: [...state.readChapterIds, chapterId]
   });
+}
+
+// Separate from resetReaderSettings: never remove reader preferences.
+export function resetProgress() {
+  return updateState({ currentChapterId: null, currentChapterNumber: null,
+    lastScrollTop: 0, readingAnchor: null, readChapterIds: [], contentsScrollTop: 0 });
 }
