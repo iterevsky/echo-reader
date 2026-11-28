@@ -9,6 +9,12 @@ export function createContentsScreen(root, onOpenChapter) {
   const rangeNav = root.querySelector('[data-range-nav]');
   const loadingMessage = root.querySelector('[data-contents-loading]');
   const densityButtons = [...root.querySelectorAll('[data-density]')];
+  const menus = [...root.querySelectorAll('details')];
+  function closeMenus(except = null) { menus.forEach(menu => { if(menu !== except) menu.open = false; }); }
+  menus.forEach(menu => menu.addEventListener('toggle', () => { if(menu.open) closeMenus(menu); }));
+  root.addEventListener('pointerdown', event => { if(!event.target.closest('details')) closeMenus(); });
+  root.addEventListener('keydown', event => { if(event.key==='Escape') { const open=menus.find(menu=>menu.open); if(open){open.open=false;open.querySelector('summary').focus();event.preventDefault();} } });
+  root.querySelector('[data-install]')?.addEventListener('click', () => closeMenus());
 
   let chapters = [];
   let initialized = false;
@@ -16,6 +22,7 @@ export function createContentsScreen(root, onOpenChapter) {
   let activeRangeStart = null;
 
   function setDensity(density) {
+    if (!['compact','normal','spacious'].includes(density)) return;
     root.dataset.density = density;
 
     densityButtons.forEach((button) => {
@@ -25,7 +32,8 @@ export function createContentsScreen(root, onOpenChapter) {
       );
     });
 
-    updateState({ density });
+    if(getState().density !== density) updateState({ density });
+    const control=document.querySelector('[data-settings-density]');if(control)control.value=density;
     updateRangeFromScroll();
   }
 
@@ -57,11 +65,13 @@ export function createContentsScreen(root, onOpenChapter) {
       const active = Number(button.dataset.rangeStart) === start;
       button.classList.toggle('is-active', active);
       button.setAttribute('aria-current', active ? 'true' : 'false');
+      if(active){const b=button.getBoundingClientRect(),n=rangeNav.getBoundingClientRect();if(b.left<n.left)rangeNav.scrollLeft+=b.left-n.left;else if(b.right>n.right)rangeNav.scrollLeft+=b.right-n.right;}
     });
   }
 
   function updateRangeFromScroll() {
     if (!chapters.length) return;
+    if(scrollArea.scrollTop>0 && scrollArea.scrollHeight-scrollArea.clientHeight-scrollArea.scrollTop<3){setActiveRange(Math.floor((chapters.at(-1).number-1)/RANGE_SIZE)*RANGE_SIZE+1);return;}
 
     const viewport = scrollArea.getBoundingClientRect();
     const entries = [...list.querySelectorAll('.chapter-row')];
@@ -77,6 +87,7 @@ export function createContentsScreen(root, onOpenChapter) {
 
   function buildRanges() {
     rangeNav.replaceChildren();
+    activeRangeStart=null;
 
     for (let start = 1; start <= chapters.length; start += RANGE_SIZE) {
       const end = Math.min(start + RANGE_SIZE - 1, chapters.length);
@@ -90,7 +101,7 @@ export function createContentsScreen(root, onOpenChapter) {
       button.addEventListener('click', () => {
         const target = list.querySelector(`[data-chapter-number="${start}"]`);
         if (target) {
-          target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          scrollArea.scrollTo({top:scrollArea.scrollTop+target.getBoundingClientRect().top-scrollArea.getBoundingClientRect().top,behavior:window.matchMedia('(prefers-reduced-motion: reduce)').matches?'instant':'smooth'});
         }
       });
 
@@ -180,6 +191,7 @@ export function createContentsScreen(root, onOpenChapter) {
   }
 
   function show({ preserveScroll = false } = {}) {
+    setDensity(getState().density);
     root.inert = false;
     root.setAttribute('aria-hidden', 'false');
     root.classList.add('is-active');
@@ -192,6 +204,7 @@ export function createContentsScreen(root, onOpenChapter) {
   }
 
   function hide() {
+    closeMenus();
     root.classList.remove('is-active');
     root.setAttribute('aria-hidden', 'true');
     root.inert = true;
@@ -206,7 +219,7 @@ export function createContentsScreen(root, onOpenChapter) {
   }
 
   densityButtons.forEach((button) => {
-    button.addEventListener('click', () => setDensity(button.dataset.density));
+    button.addEventListener('click', () => {setDensity(button.dataset.density);const menu=button.closest('details');if(menu){menu.open=false;menu.querySelector('summary').focus({preventScroll:true});}});
   });
 
   scrollArea.addEventListener('scroll', () => {
@@ -229,6 +242,8 @@ export function createContentsScreen(root, onOpenChapter) {
 
   return {
     initialize,
+    setDensity,
+    closeMenus,
     show,
     hide,
     refreshState,

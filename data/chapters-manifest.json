@@ -1,7 +1,7 @@
 {
   "schemaVersion": 2,
-  "contentVersion": "0234223351dacd3a01e2",
-  "catalogSha256": "66b1ed8cd25e857d1fb4c1236291688fe297a602f842b45b22c265dcc37e6e70",
+  "contentVersion": "1ed4089ac592dd8a40f1",
+  "catalogSha256": "af2c769cfe7754802dc593b79a35284ebb1aed289bb83d1b31c15a4dcc0d1484",
   "chapterCount": 86,
   "totalBytes": 1118470,
   "chapters": [
@@ -608,7 +608,7 @@
       "bytes": 27204
     }
   ],
-  "mediaBytes": 567914,
+  "mediaBytes": 585026,
   "media": [
     {
       "file": "assets/illustrations/frontispiece-cool.webp",
@@ -627,6 +627,694 @@
       "sha256": "799ee394ae44b78a1e394204b927e5ccad0223bdf200c2b3db638dbc8e1f1307",
       "bytes": 201058,
       "chapters": []
+    },
+    {
+      "file": "data/artwork/001.json",
+      "sha256": "835caa729c3bd6196744d58cc3c34e52df250675cd1902d2c68ffe700db82ab6",
+      "bytes": 201,
+      "chapters": [
+        "chapter-001"
+      ]
+    },
+    {
+      "file": "data/artwork/002.json",
+      "sha256": "71eef1d6a4f4e220794139e7709dcc8e66f434deaec3c3b30533cf6eecaae960",
+      "bytes": 201,
+      "chapters": [
+        "chapter-002"
+      ]
+    },
+    {
+      "file": "data/artwork/003.json",
+      "sha256": "1ddfa8eaae93c22c76c37cc3fa682f552092e3fb659ca3615d276fd13e96960a",
+      "bytes": 201,
+      "chapters": [
+        "chapter-003"
+      ]
+    },
+    {
+      "file": "data/artwork/004.json",
+      "sha256": "68f492991002695bb9afb60745238644272df945c8df6567e86214c0b7e6ac30",
+      "bytes": 198,
+      "chapters": [
+        "chapter-004"
+      ]
+    },
+    {
+      "file": "data/artwork/005.json",
+      "sha256": "8c2369125751bee7a355e41344184d095d432e53348ce5c577abca1d3e4a2565",
+      "bytes": 198,
+      "chapters": [
+        "chapter-005"
+      ]
+    },
+    {
+      "file": "data/artwork/006.json",
+      "sha256": "b8df4b9816bf1619ba420ca7a10ad8140fcc871b3fb04c94eb3a12d1683730bd",
+      "bytes": 198,
+      "chapters": [
+        "chapter-006"
+      ]
+    },
+    {
+      "file": "data/artwork/007.json",
+      "sha256": "bac13d0a5b15d654d3121af7bc58e832ff666751b1f0cfc98019deab79cdaba9",
+      "bytes": 198,
+      "chapters": [
+        "chapter-007"
+      ]
+    },
+    {
+      "file": "data/artwork/008.json",
+      "sha256": "3b57ce3d2a5888aaead60b60ed484d40c92d9ae38cbbb970ddff4dce5a382940",
+      "bytes": 201,
+      "chapters": [
+        "chapter-008"
+      ]
+    },
+    {
+      "file": "data/artwork/009.json",
+      "sha256": "d2a7e0b0cea837d5141fcf038e747ab902c6ac68480880d182a2d8c16d16eea0",
+      "bytes": 201,
+      "chapters": [
+        "chapter-009"
+      ]
+    },
+    {
+      "file": "data/artwork/010.json",
+      "sha256": "0225144f176aaa252b4cbd9abda7455213f449f8a09b3f057fb906157f66362f",
+      "bytes": 198,
+      "chapters": [
+        "chapter-010"
+      ]
+    },
+    {
+      "file": "data/artwork/011.json",
+      "sha256": "99f7fff620d98b9221c2140eddddb8bf9912b0f1d3de6947d809a2713c300a45",
+      "bytes": 198,
+      "chapters": [
+        "chapter-011"
+      ]
+    },
+    {
+      "file": "data/artwork/012.json",
+      "sha256": "090d5e12885e7854ddc0fd357780eca77b48dc29ff477723763f0cb7d28e2760",
+      "bytes": 198,
+      "chapters": [
+        "chapter-012"
+      ]
+    },
+    {
+      "file": "data/artwork/013.json",
+      "sha256": "5dfd40d13d3f57c8f4c642d88f1b729ba06616b141711b887de47e6c8a7e5d10",
+      "bytes": 201,
+      "chapters": [
+        "chapter-013"
+      ]
+    },
+    {
+      "file": "data/artwork/014.json",
+      "sha256": "0d2f5c8677bd9a5bc75a42575939df39e84d5d932e908ae776a27ab70931ed70",
+      "bytes": 198,
+      "chapters": [
+        "chapter-014"
+      ]
+    },
+    {
+      "file": "data/artwork/015.json",
+      "sha256": "be489718049de9db6d384ca9eac1468bc4d5cddb94742884749e18dbc7e4d9be",
+      "bytes": 198,
+      "chapters": [
+        "chapter-015"
+      ]
+    },
+    {
+      "file": "data/artwork/016.json",
+      "sha256": "ddbd3af8102f6e1481b9bebea10399a389cfb65dadfd6edeaa42ef0dea7c719f",
+      "bytes": 201,
+      "chapters": [
+        "chapter-016"
+      ]
+    },
+    {
+      "file": "data/artwork/017.json",
+      "sha256": "a1f7b568b25e8a144ab025242250a291cef7d72deb4bee5fdfecfce9ddf65fe2",
+      "bytes": 198,
+      "chapters": [
+        "chapter-017"
+      ]
+    },
+    {
+      "file": "data/artwork/018.json",
+      "sha256": "1a97ef93b7a34f8655e279c9d882d7d1383f67d83f34a2e0d4cf0674994760ad",
+      "bytes": 198,
+      "chapters": [
+        "chapter-018"
+      ]
+    },
+    {
+      "file": "data/artwork/019.json",
+      "sha256": "b60d3c075e6315469aad43b8cb837da9d952acb3982615ff5200c1d475711eec",
+      "bytes": 198,
+      "chapters": [
+        "chapter-019"
+      ]
+    },
+    {
+      "file": "data/artwork/020.json",
+      "sha256": "d146f8b3af2d0a93a7129505420f28fa70ffc79c6a9f19dda830f5a51e0ed7cc",
+      "bytes": 198,
+      "chapters": [
+        "chapter-020"
+      ]
+    },
+    {
+      "file": "data/artwork/021.json",
+      "sha256": "982457a5b7ad0555a4300166eafdd5202558383bb882d2bdbf712714b78e53ed",
+      "bytes": 198,
+      "chapters": [
+        "chapter-021"
+      ]
+    },
+    {
+      "file": "data/artwork/022.json",
+      "sha256": "4df7e15801cd9ad104ecde81509897826469060f66269494fe466ab209b159df",
+      "bytes": 198,
+      "chapters": [
+        "chapter-022"
+      ]
+    },
+    {
+      "file": "data/artwork/023.json",
+      "sha256": "bca296be734697f7c8ee09c4c7755d244c8ccb1547474ab6b9937c59cfa35aba",
+      "bytes": 198,
+      "chapters": [
+        "chapter-023"
+      ]
+    },
+    {
+      "file": "data/artwork/024.json",
+      "sha256": "e3562c138307b179b0a5a28512142799372515f12cc662630b3f138adb306325",
+      "bytes": 198,
+      "chapters": [
+        "chapter-024"
+      ]
+    },
+    {
+      "file": "data/artwork/025.json",
+      "sha256": "d54ea576c201650905307fcc4eb03e99ffff9b0817f5577f00fad2dcff90266d",
+      "bytes": 198,
+      "chapters": [
+        "chapter-025"
+      ]
+    },
+    {
+      "file": "data/artwork/026.json",
+      "sha256": "f34dc24e7732ba035f511686f4bb450a6b9a01acf7af6debc7a14769cdeeae00",
+      "bytes": 198,
+      "chapters": [
+        "chapter-026"
+      ]
+    },
+    {
+      "file": "data/artwork/027.json",
+      "sha256": "1daf0379dc620c05a018682e56348bc53ab737102aa1a479239fc36846851ec5",
+      "bytes": 201,
+      "chapters": [
+        "chapter-027"
+      ]
+    },
+    {
+      "file": "data/artwork/028.json",
+      "sha256": "cdd8dbac3f27b3ce0b7a94c774eee172adb1d62e60d9273dd49ffc14bf5a7e60",
+      "bytes": 198,
+      "chapters": [
+        "chapter-028"
+      ]
+    },
+    {
+      "file": "data/artwork/029.json",
+      "sha256": "91e10798d7dff32049f918b9c2ef4b00261f2ad62e68b628a93cee124c7a72cb",
+      "bytes": 201,
+      "chapters": [
+        "chapter-029"
+      ]
+    },
+    {
+      "file": "data/artwork/030.json",
+      "sha256": "88c205cf308372b22954e44587c4ae6c056a209c8b14a77dc024ba41c615da3a",
+      "bytes": 201,
+      "chapters": [
+        "chapter-030"
+      ]
+    },
+    {
+      "file": "data/artwork/031.json",
+      "sha256": "da7c485e51b1c29a310339f2209abd4e4cba80d7ee404a77b7e823c66e470119",
+      "bytes": 201,
+      "chapters": [
+        "chapter-031"
+      ]
+    },
+    {
+      "file": "data/artwork/032.json",
+      "sha256": "bf7c5a0c557b208155ba499d1a04d5ce71b4e98578f3d3a17d3ed0e239167c51",
+      "bytes": 198,
+      "chapters": [
+        "chapter-032"
+      ]
+    },
+    {
+      "file": "data/artwork/033.json",
+      "sha256": "40f0bfd136de58f9f81094d800965df51a7e368d58d5be26285b7c03c3b51377",
+      "bytes": 198,
+      "chapters": [
+        "chapter-033"
+      ]
+    },
+    {
+      "file": "data/artwork/034.json",
+      "sha256": "5f6346cc0dc00263aa075782bc70b6fbe6d45ff8b7d4b943445340cb80cd0e36",
+      "bytes": 198,
+      "chapters": [
+        "chapter-034"
+      ]
+    },
+    {
+      "file": "data/artwork/035.json",
+      "sha256": "673c907836eb9513ac66f18d743ad301f5b1c87fec36a4eca08f6efaf7da0619",
+      "bytes": 198,
+      "chapters": [
+        "chapter-035"
+      ]
+    },
+    {
+      "file": "data/artwork/036.json",
+      "sha256": "255b295c2c80113a9183a0499648dfaf5e62c5ee3d62d53bd002af082b531134",
+      "bytes": 201,
+      "chapters": [
+        "chapter-036"
+      ]
+    },
+    {
+      "file": "data/artwork/037.json",
+      "sha256": "ceafa1eb09d9299e6cbc615f962bcfa198bfe65ab9d32b999d816973a1d8dc42",
+      "bytes": 201,
+      "chapters": [
+        "chapter-037"
+      ]
+    },
+    {
+      "file": "data/artwork/038.json",
+      "sha256": "79c54defa2ac56aee6ef543cf1098dfe7fd1ef9e1b5d68c620a8710318bd991f",
+      "bytes": 201,
+      "chapters": [
+        "chapter-038"
+      ]
+    },
+    {
+      "file": "data/artwork/039.json",
+      "sha256": "d7bbc6e89c3987cb550e5fe7624f8ab3b7a17764baaf333928a37cd0b728a197",
+      "bytes": 198,
+      "chapters": [
+        "chapter-039"
+      ]
+    },
+    {
+      "file": "data/artwork/040.json",
+      "sha256": "8993ce9b2d6464fe074a14fc657de8f914cfba60b33a98d423c206c2bb40ae36",
+      "bytes": 201,
+      "chapters": [
+        "chapter-040"
+      ]
+    },
+    {
+      "file": "data/artwork/041.json",
+      "sha256": "70f4ccbc2a80725b9eb30e7e15204d1b732a3fcb716ef440b9ced6b95ee5fb6b",
+      "bytes": 198,
+      "chapters": [
+        "chapter-041"
+      ]
+    },
+    {
+      "file": "data/artwork/042.json",
+      "sha256": "c71bfccda1a843188135a619621c9df6da2e4e0751194005ae21e8fd93d15f76",
+      "bytes": 201,
+      "chapters": [
+        "chapter-042"
+      ]
+    },
+    {
+      "file": "data/artwork/043.json",
+      "sha256": "032d0f1277613a24fdc246ae33e5c0847ef68739a05d3d95363a856ae7d81204",
+      "bytes": 201,
+      "chapters": [
+        "chapter-043"
+      ]
+    },
+    {
+      "file": "data/artwork/044.json",
+      "sha256": "1bded67993e58f86e6425cfad2cf9f60f1058a8f88d4c42f8ef51b1c87d58dfe",
+      "bytes": 198,
+      "chapters": [
+        "chapter-044"
+      ]
+    },
+    {
+      "file": "data/artwork/045.json",
+      "sha256": "72fbe2defb8fcb5852f41b6522d5d1d8b81560412c004a0babf6b48766dd3511",
+      "bytes": 198,
+      "chapters": [
+        "chapter-045"
+      ]
+    },
+    {
+      "file": "data/artwork/046.json",
+      "sha256": "9116367d399f11fe4711c512e47e278df9b073b105003e3ff7e32928ca18a098",
+      "bytes": 198,
+      "chapters": [
+        "chapter-046"
+      ]
+    },
+    {
+      "file": "data/artwork/047.json",
+      "sha256": "7e822746486f1ca26769d36a25846ecea99a7a4f72ab107f8fefb27b3916b4f0",
+      "bytes": 201,
+      "chapters": [
+        "chapter-047"
+      ]
+    },
+    {
+      "file": "data/artwork/048.json",
+      "sha256": "c722d8ac0aa0d560ee3e99d4f2f7a2adc6b84405a6a7a5b0de9f9849ecf4e116",
+      "bytes": 198,
+      "chapters": [
+        "chapter-048"
+      ]
+    },
+    {
+      "file": "data/artwork/049.json",
+      "sha256": "c7703855f6daade639a97c5da92267aa016932a11a72d5b3422d736d4ecb259e",
+      "bytes": 198,
+      "chapters": [
+        "chapter-049"
+      ]
+    },
+    {
+      "file": "data/artwork/050.json",
+      "sha256": "7be92363191d9dc159b1d610497cd59edc848b2257e1da7e9bc450a3d149f31c",
+      "bytes": 198,
+      "chapters": [
+        "chapter-050"
+      ]
+    },
+    {
+      "file": "data/artwork/051.json",
+      "sha256": "fa27d6cfc2e2dca3024eb23ef2c16079ab72ad4e7b018ea27dba5a335ac8771c",
+      "bytes": 201,
+      "chapters": [
+        "chapter-051"
+      ]
+    },
+    {
+      "file": "data/artwork/052.json",
+      "sha256": "8d7575f3711a9539259b0c01a3170b9cf5fa16acbb12e7f93c35b7a205dc4b30",
+      "bytes": 198,
+      "chapters": [
+        "chapter-052"
+      ]
+    },
+    {
+      "file": "data/artwork/053.json",
+      "sha256": "f2460cc797bdc643da8baeff1cea0fc667378be6260655390718587099874d1b",
+      "bytes": 198,
+      "chapters": [
+        "chapter-053"
+      ]
+    },
+    {
+      "file": "data/artwork/054.json",
+      "sha256": "15de916307a3f6d6078ad9df06e22193a63a55b7dfd3428113d3cad95b0b44fb",
+      "bytes": 198,
+      "chapters": [
+        "chapter-054"
+      ]
+    },
+    {
+      "file": "data/artwork/055.json",
+      "sha256": "23d56c79ec069046118344c64f2b8e3da0e447169ec647434d7ef6d374bd5845",
+      "bytes": 198,
+      "chapters": [
+        "chapter-055"
+      ]
+    },
+    {
+      "file": "data/artwork/056.json",
+      "sha256": "e0cbbbfa9a15804370387d2d416552ee6948f9b43e527ad8569ce8731f1f34be",
+      "bytes": 198,
+      "chapters": [
+        "chapter-056"
+      ]
+    },
+    {
+      "file": "data/artwork/057.json",
+      "sha256": "d60218f55384c8dd9cbfdc83d783aee82490405e8a1501a34649da1f735e0925",
+      "bytes": 198,
+      "chapters": [
+        "chapter-057"
+      ]
+    },
+    {
+      "file": "data/artwork/058.json",
+      "sha256": "250b6c3ae99dc56f7d0ea4c5718f64492a7d7f1d887f866976fc49c7da8c2f61",
+      "bytes": 198,
+      "chapters": [
+        "chapter-058"
+      ]
+    },
+    {
+      "file": "data/artwork/059.json",
+      "sha256": "6aabcc911d5f5c23a26ecdb4a238e09eb20ed6e4cd741c8546eac71c96c0b703",
+      "bytes": 201,
+      "chapters": [
+        "chapter-059"
+      ]
+    },
+    {
+      "file": "data/artwork/060.json",
+      "sha256": "0927cd27d22099360ff0f77e043656ddad8802626c6960a861eee0328f061a70",
+      "bytes": 201,
+      "chapters": [
+        "chapter-060"
+      ]
+    },
+    {
+      "file": "data/artwork/061.json",
+      "sha256": "39aa9b8c0b66fb9f1eb0f6bfc35f3d3526df392466cc50ff5a503552f205e8a1",
+      "bytes": 198,
+      "chapters": [
+        "chapter-061"
+      ]
+    },
+    {
+      "file": "data/artwork/062.json",
+      "sha256": "0a86e7e159e63fc2e6938dfd4e6abfc153c27aedf0214952fd7bb37cec954ebd",
+      "bytes": 201,
+      "chapters": [
+        "chapter-062"
+      ]
+    },
+    {
+      "file": "data/artwork/063.json",
+      "sha256": "bcc1daface2b57b6996efdb3526f4ef6b871e026b7ec8ba403580c01f85cbbed",
+      "bytes": 198,
+      "chapters": [
+        "chapter-063"
+      ]
+    },
+    {
+      "file": "data/artwork/064.json",
+      "sha256": "71fbd3f303282cdcfdd43a85131b84fcb5d1728c967979578317ddd2c303420b",
+      "bytes": 198,
+      "chapters": [
+        "chapter-064"
+      ]
+    },
+    {
+      "file": "data/artwork/065.json",
+      "sha256": "bfdda70d217a1e23667ece3260c7c4647381480eb7fb67dd6a4de7ad7afbab7a",
+      "bytes": 198,
+      "chapters": [
+        "chapter-065"
+      ]
+    },
+    {
+      "file": "data/artwork/066.json",
+      "sha256": "0496f59c80fb56c71997aea6ea0bdd1c7e8bb417459e5970e0d5026281c5f962",
+      "bytes": 198,
+      "chapters": [
+        "chapter-066"
+      ]
+    },
+    {
+      "file": "data/artwork/067.json",
+      "sha256": "6bf7d09110994e75ac1ffa140d99fd2da8c1d1eba9e0a34335deccf5fd243319",
+      "bytes": 198,
+      "chapters": [
+        "chapter-067"
+      ]
+    },
+    {
+      "file": "data/artwork/068.json",
+      "sha256": "8b7958070a36a163e2fb4f84d37e357f535911f74c5209aa6ccf124b270d1753",
+      "bytes": 198,
+      "chapters": [
+        "chapter-068"
+      ]
+    },
+    {
+      "file": "data/artwork/069.json",
+      "sha256": "f1dfee3a05704a01bd66f0de48e76cb6b05307b62329ad729593825e6b2b0b2c",
+      "bytes": 198,
+      "chapters": [
+        "chapter-069"
+      ]
+    },
+    {
+      "file": "data/artwork/070.json",
+      "sha256": "f01401ca27f0208ffb060eb33e12dbc0a1a33a89dab0b68a37e013dadde7e8ee",
+      "bytes": 201,
+      "chapters": [
+        "chapter-070"
+      ]
+    },
+    {
+      "file": "data/artwork/071.json",
+      "sha256": "fc3d658da4bee8af0be2d9831604fb86628be5381d3e2e82d62b51df5f5f3d13",
+      "bytes": 198,
+      "chapters": [
+        "chapter-071"
+      ]
+    },
+    {
+      "file": "data/artwork/072.json",
+      "sha256": "1c59b274696193343164f9b13619467ba6a2daa77418d6a61bc725ce893b9255",
+      "bytes": 201,
+      "chapters": [
+        "chapter-072"
+      ]
+    },
+    {
+      "file": "data/artwork/073.json",
+      "sha256": "b1b9848b066afc5fb30dc251713cb7cd8f456ec21f49636b1224bf3525364037",
+      "bytes": 201,
+      "chapters": [
+        "chapter-073"
+      ]
+    },
+    {
+      "file": "data/artwork/074.json",
+      "sha256": "31d1ca69e67dc57395a3237f9b5b81de8b2a0aa4fedd8af5f256bf2ca1612222",
+      "bytes": 198,
+      "chapters": [
+        "chapter-074"
+      ]
+    },
+    {
+      "file": "data/artwork/075.json",
+      "sha256": "264c0bc4e267f1eeed10522f6b7bd3bfec02922e72d5c3288221d32ec6e8e1f8",
+      "bytes": 198,
+      "chapters": [
+        "chapter-075"
+      ]
+    },
+    {
+      "file": "data/artwork/076.json",
+      "sha256": "0170308547d8e6e8056a34c7ad625c90419c823475910a2791cd02dc944c74c6",
+      "bytes": 198,
+      "chapters": [
+        "chapter-076"
+      ]
+    },
+    {
+      "file": "data/artwork/077.json",
+      "sha256": "996c85641a13af5864f8ad2b37e2a8110992a6999a5947010bc6d990e8a69048",
+      "bytes": 198,
+      "chapters": [
+        "chapter-077"
+      ]
+    },
+    {
+      "file": "data/artwork/078.json",
+      "sha256": "42f07f769fcac1ecec52f4a76026f6a2a6c2fed32fd0143a76dffb52dc992737",
+      "bytes": 198,
+      "chapters": [
+        "chapter-078"
+      ]
+    },
+    {
+      "file": "data/artwork/079.json",
+      "sha256": "2f1438f47b44f06fbc93cf457c403379821a78360d34085ff95a9fb658c2988d",
+      "bytes": 201,
+      "chapters": [
+        "chapter-079"
+      ]
+    },
+    {
+      "file": "data/artwork/080.json",
+      "sha256": "6117badf40374991cb349c18f8b5fa07b08dcbd76bd50f3f6c656b4a468031e5",
+      "bytes": 201,
+      "chapters": [
+        "chapter-080"
+      ]
+    },
+    {
+      "file": "data/artwork/081.json",
+      "sha256": "168af108bf279c10d1f7d4e25cf7fdcd1e421f9b767e6c4d007c00484dc973be",
+      "bytes": 201,
+      "chapters": [
+        "chapter-081"
+      ]
+    },
+    {
+      "file": "data/artwork/082.json",
+      "sha256": "3d170fa0226d8e26b1f71cccb6f148a23ce8a706ba8139f29ed09098a86f0225",
+      "bytes": 198,
+      "chapters": [
+        "chapter-082"
+      ]
+    },
+    {
+      "file": "data/artwork/083.json",
+      "sha256": "bca8dece1ba607872f50ea3616ff9a366626a0c1e7ad1c10e64193ad209ccbcf",
+      "bytes": 198,
+      "chapters": [
+        "chapter-083"
+      ]
+    },
+    {
+      "file": "data/artwork/084.json",
+      "sha256": "e7c17c32adc61eaa9059ba3ddba548f4d685d3c2b4fd4eb7d015f582a8405e3c",
+      "bytes": 198,
+      "chapters": [
+        "chapter-084"
+      ]
+    },
+    {
+      "file": "data/artwork/085.json",
+      "sha256": "8a06dabfe50093e9cef1498c8590fdcf890b0dd48397cd86e34aae2825649eb1",
+      "bytes": 198,
+      "chapters": [
+        "chapter-085"
+      ]
+    },
+    {
+      "file": "data/artwork/086.json",
+      "sha256": "e13f6b6231c4dfaf4dbea7d3e11b5e508ab19402a86db3f95f28ef344e45ee63",
+      "bytes": 198,
+      "chapters": [
+        "chapter-086"
+      ]
     }
   ]
 }

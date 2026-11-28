@@ -1,5 +1,5 @@
 /* ЭХО: Service Worker. BUILD_ID меняется при выпуске обновления оболочки. */
-const BUILD_ID = 'echo-shell-2026-11-28-v13-rc1';
+const BUILD_ID = 'echo-shell-2026-11-28-v15';
 const SHELL_CACHE = `echo-shell-${BUILD_ID}-${encodeURIComponent(new URL(self.registration.scope).pathname)}`;
 const META_CACHE = 'echo-meta-v1';
 const BOOTSTRAP_CACHE = 'echo-content-bootstrap-v1';

@@ -58,7 +58,8 @@ async function fromCache(cache){try{const [c,m]=await Promise.all([cache.match(u
 async function openVersion(version){if(!versionOK(version))return null;try{const snap=await fromCache(await caches.open(PREFIX+version));return snap?.version===version?snap:null;}catch{return null;}}
 async function persistSnapshot(snap){const cache=await caches.open(PREFIX+snap.version);await cache.put(url(CATALOG),response(snap.catalogBytes,CATALOG));await cache.put(url(MANIFEST),response(snap.manifestBytes,MANIFEST));return cache;}
 async function checked(cache,item){try{const r=await cache.match(url(item.file));if(!r)return null;const b=await r.arrayBuffer();if(b.byteLength===item.bytes&&await digest(b)===item.sha256)return b;}catch{}return null;}
-async function completeText(snap){const cache=await caches.open(PREFIX+snap.version);for(const item of snap.manifest.chapters)if(!await checked(cache,item))return false;return true;}
+const essentialMedia = snap => snap.media.filter(x=>universal.includes(x.file)||/^data\/artwork\/\d{3}\.json$/.test(x.file));
+async function completeText(snap){const cache=await caches.open(PREFIX+snap.version);for(const item of [...snap.manifest.chapters,...essentialMedia(snap)])if(!await checked(cache,item))return false;return true;}
 // Web Locks serialize marker changes where supported. Immutable versions also
 // keep open sessions isolated when the API is not present.
 const locked = task => globalThis.navigator?.locks?.request ? navigator.locks.request(META,task) : task();
@@ -135,6 +136,7 @@ async function stageUpdate(snap){
   const active=await readMarker('active');if(active?.version===fresh.version)return 'Новая версия доступна после повторного открытия приложения.';
   await persistSnapshot(fresh);
   await download(fresh,fresh.manifest.chapters,(n,total)=>status(`Подготовка обновления: ${n}/${total} глав.`));
+  await download(fresh,essentialMedia(fresh),(n,total)=>status(`Подготовка оформления: ${n}/${total} файлов.`));
   if(!await completeText(fresh))return 'Обновление не завершено; текущая версия сохранена.';
   // A newer manifest can arrive while this one downloads. Only mark the version
   // still published at the end of staging, never an obsolete partial snapshot.
@@ -146,7 +148,7 @@ async function run(){
   if(!storageAvailable){status('Браузер не разрешил сохранять файлы. Чтение из сети доступно; офлайн-комплект не подготовлен.','warning');return {complete:false};}
   if(full)await navigator.storage?.persist?.().catch(()=>false);
   await download(snap,snap.manifest.chapters,(n,total)=>status(`Проверка и загрузка текста: ${n}/${total} глав.`));
-  await download(snap,full?snap.media:nearby(snap),(n,total)=>status(`Загрузка художественных файлов: ${n}/${total}.`));
+  await download(snap,full?snap.media:[...new Map([...essentialMedia(snap),...nearby(snap)].map(x=>[x.file,x])).values()],(n,total)=>status(`Загрузка художественных файлов: ${n}/${total}.`));
   const extra=await stageUpdate(snap);return report(snap,extra);
 }
 export function startOfflineManager(chapters,node,options={}){

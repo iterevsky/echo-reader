@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "chapter": "chapter-018",
+  "cover": {
+    "mood": "warm",
+    "effects": [
+      "V01",
+      "V04",
+      "V05"
+    ],
+    "afterReveal": "animate"
+  },
+  "scenes": []
+}

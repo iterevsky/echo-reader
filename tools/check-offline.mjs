@@ -16,10 +16,11 @@ let n=0;function pass(label){console.log('PASS',++n,label);}
 const status={dataset:{},textContent:''};
 const a=await import('../scripts/core/offline.js?tab=a');
 const catalog=await a.loadEditionCatalog();assert.equal(catalog.chapters.length,86);pass('catalog validated and session pinned');
-assert.equal((await a.editionDownloadInfo()).media,3);pass('download size from manifest');
-const first=await a.startOfflineManager(catalog.chapters,status,{full:true});assert.equal(first.text.n,86);assert.equal(first.media.n,3);assert.equal(first.complete,true);assert(!status.textContent.includes('доступны офлайн'));pass('all text and media verified; no shell-ready claim without worker');
+assert.equal((await a.editionDownloadInfo()).media,89);pass('download size from manifest');
+const first=await a.startOfflineManager(catalog.chapters,status,{full:true});assert.equal(first.text.n,86);assert.equal(first.media.n,89);assert.equal(first.complete,true);assert(!status.textContent.includes('доступны офлайн'));pass('all text and media verified; no shell-ready claim without worker');
 const activeKey=(await caches.keys()).find(k=>k.endsWith(manifest.contentVersion)&&k.startsWith('echo-edition-'));const cache=await caches.open(activeKey);
 log=[];offline=true;const read=await a.fetchEditionFile(catalog.chapters[0].file);assert.equal(hex(Buffer.from(await read.arrayBuffer())),manifest.chapters[0].sha256);const media=await a.fetchEditionFile(manifest.media[0].file);assert.equal(hex(Buffer.from(await media.arrayBuffer())),manifest.media[0].sha256);assert.equal(log.length,0);pass('offline text and image bytes from verified cache');
+for(const ch of catalog.chapters){const art=await (await a.fetchEditionFile(ch.artwork)).json();assert.equal(art.chapter,ch.id);assert(['cool','neutral','warm'].includes(art.cover.mood));}assert.equal(log.length,0);pass('all 86 artwork sidecars available offline');
 const b=await import('../scripts/core/offline.js?tab=b');assert.equal((await b.loadEditionCatalog()).chapters.length,86);pass('reopen edition offline');
 const path=manifest.chapters[0].file;await cache.put(u(path),new Response('corrupt'));await assert.rejects(a.fetchEditionFile(path));pass('corrupt offline chapter rejected');
 offline=false;invalid.add(path);await assert.rejects(a.fetchEditionFile(path));invalid.clear();assert.equal(hex(Buffer.from(await (await a.fetchEditionFile(path)).arrayBuffer())),manifest.chapters[0].sha256);pass('bad network file rejected; later valid file repairs cache');

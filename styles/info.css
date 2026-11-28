@@ -36,4 +36,4 @@
 .info-note { font:12px/1.6 Arial,sans-serif; color:var(--color-muted); margin:3px 0; }
 :is(.info-screen,.edition-menu,.edition-footer) :is(button,a,summary,input,select,textarea):focus-visible { outline:2px solid #a48c70; outline-offset:3px; }
 [data-echo-theme="light"] .edition-menu nav { background:#faf6ee; border-color:#c9baa8; box-shadow:0 10px 25px #392f2820; }
-@media (max-width:560px) { .edition-menu { align-self:flex-start; } .contents-heading{min-width:0;} .contents-header { column-gap:8px; } }
+

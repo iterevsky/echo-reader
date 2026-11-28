@@ -5,517 +5,603 @@
       "id": "chapter-001",
       "number": 1,
       "title": "В начале была метель",
-      "file": "data/chapters/001.html"
+      "file": "data/chapters/001.html",
+      "artwork": "data/artwork/001.json"
     },
     {
       "id": "chapter-002",
       "number": 2,
       "title": "Разложив большую часть своих вещей, я решил, что сейчас самое время прогуляться до Волги",
-      "file": "data/chapters/002.html"
+      "file": "data/chapters/002.html",
+      "artwork": "data/artwork/002.json"
     },
     {
       "id": "chapter-003",
       "number": 3,
       "title": "Воздух казался мне другим",
-      "file": "data/chapters/003.html"
+      "file": "data/chapters/003.html",
+      "artwork": "data/artwork/003.json"
     },
     {
       "id": "chapter-004",
       "number": 4,
       "title": "Ветер резко подул с реки, ударив обжигающим холодом по лицу",
-      "file": "data/chapters/004.html"
+      "file": "data/chapters/004.html",
+      "artwork": "data/artwork/004.json"
     },
     {
       "id": "chapter-005",
       "number": 5,
       "title": "Я шёл по спальному району, уже недалеко от своего нового дома",
-      "file": "data/chapters/005.html"
+      "file": "data/chapters/005.html",
+      "artwork": "data/artwork/005.json"
     },
     {
       "id": "chapter-006",
       "number": 6,
       "title": "Дома пахло едой, мама за время моего отсутствия уже успела приготовить ужин",
-      "file": "data/chapters/006.html"
+      "file": "data/chapters/006.html",
+      "artwork": "data/artwork/006.json"
     },
     {
       "id": "chapter-007",
       "number": 7,
       "title": "Я прошёл на кухню, сел за стол",
-      "file": "data/chapters/007.html"
+      "file": "data/chapters/007.html",
+      "artwork": "data/artwork/007.json"
     },
     {
       "id": "chapter-008",
       "number": 8,
       "title": "Ночью долго не мог уснуть, постоянно ворочаясь и словно ощущая в квартире чьё-то чужое присутствие",
-      "file": "data/chapters/008.html"
+      "file": "data/chapters/008.html",
+      "artwork": "data/artwork/008.json"
     },
     {
       "id": "chapter-009",
       "number": 9,
       "title": "Я вышел из своей комнаты с ощущением, будто и не спал вовсе",
-      "file": "data/chapters/009.html"
+      "file": "data/chapters/009.html",
+      "artwork": "data/artwork/009.json"
     },
     {
       "id": "chapter-010",
       "number": 10,
       "title": "Мама вернулась из школы",
-      "file": "data/chapters/010.html"
+      "file": "data/chapters/010.html",
+      "artwork": "data/artwork/010.json"
     },
     {
       "id": "chapter-011",
       "number": 11,
       "title": "Долго ворочался и не мог уснуть",
-      "file": "data/chapters/011.html"
+      "file": "data/chapters/011.html",
+      "artwork": "data/artwork/011.json"
     },
     {
       "id": "chapter-012",
       "number": 12,
       "title": "Утром заверещал будильник",
-      "file": "data/chapters/012.html"
+      "file": "data/chapters/012.html",
+      "artwork": "data/artwork/012.json"
     },
     {
       "id": "chapter-013",
       "number": 13,
       "title": "Улица встретила туманом",
-      "file": "data/chapters/013.html"
+      "file": "data/chapters/013.html",
+      "artwork": "data/artwork/013.json"
     },
     {
       "id": "chapter-014",
       "number": 14,
       "title": "Ольга Васильевна зашла со мной в класс",
-      "file": "data/chapters/014.html"
+      "file": "data/chapters/014.html",
+      "artwork": "data/artwork/014.json"
     },
     {
       "id": "chapter-015",
       "number": 15,
       "title": "Прозвенел звонок",
-      "file": "data/chapters/015.html"
+      "file": "data/chapters/015.html",
+      "artwork": "data/artwork/015.json"
     },
     {
       "id": "chapter-016",
       "number": 16,
       "title": "Оставшийся день пролетел незаметно",
-      "file": "data/chapters/016.html"
+      "file": "data/chapters/016.html",
+      "artwork": "data/artwork/016.json"
     },
     {
       "id": "chapter-017",
       "number": 17,
       "title": "Когда я пришёл домой, пахло свежеприготовленной едой",
-      "file": "data/chapters/017.html"
+      "file": "data/chapters/017.html",
+      "artwork": "data/artwork/017.json"
     },
     {
       "id": "chapter-018",
       "number": 18,
       "title": "Я шёл в школу как на казнь",
-      "file": "data/chapters/018.html"
+      "file": "data/chapters/018.html",
+      "artwork": "data/artwork/018.json"
     },
     {
       "id": "chapter-019",
       "number": 19,
       "title": "Монотонно звучал голос Елены Николаевны, учительницы алгебры и геометрии, рассказывающей о темах",
-      "file": "data/chapters/019.html"
+      "file": "data/chapters/019.html",
+      "artwork": "data/artwork/019.json"
     },
     {
       "id": "chapter-020",
       "number": 20,
       "title": "Я вышел из школы, погружённый в свои мысли",
-      "file": "data/chapters/020.html"
+      "file": "data/chapters/020.html",
+      "artwork": "data/artwork/020.json"
     },
     {
       "id": "chapter-021",
       "number": 21,
       "title": "Мне не хотелось домой",
-      "file": "data/chapters/021.html"
+      "file": "data/chapters/021.html",
+      "artwork": "data/artwork/021.json"
     },
     {
       "id": "chapter-022",
       "number": 22,
       "title": "Я шёл в школу, вжимая плечи от ветра, а может — от чего-то большего",
-      "file": "data/chapters/022.html"
+      "file": "data/chapters/022.html",
+      "artwork": "data/artwork/022.json"
     },
     {
       "id": "chapter-023",
       "number": 23,
       "title": "Начался урок",
-      "file": "data/chapters/023.html"
+      "file": "data/chapters/023.html",
+      "artwork": "data/artwork/023.json"
     },
     {
       "id": "chapter-024",
       "number": 24,
       "title": "Закончился последний урок",
-      "file": "data/chapters/024.html"
+      "file": "data/chapters/024.html",
+      "artwork": "data/artwork/024.json"
     },
     {
       "id": "chapter-025",
       "number": 25,
       "title": "Я стоял у раздевалки, неуклюже пытаясь надеть куртку",
-      "file": "data/chapters/025.html"
+      "file": "data/chapters/025.html",
+      "artwork": "data/artwork/025.json"
     },
     {
       "id": "chapter-026",
       "number": 26,
       "title": "Квартира Максима была в соседнем доме от моего",
-      "file": "data/chapters/026.html"
+      "file": "data/chapters/026.html",
+      "artwork": "data/artwork/026.json"
     },
     {
       "id": "chapter-027",
       "number": 27,
       "title": "Апрельский воздух ударил в лицо, и я с наслаждением вдохнул его полной грудью",
-      "file": "data/chapters/027.html"
+      "file": "data/chapters/027.html",
+      "artwork": "data/artwork/027.json"
     },
     {
       "id": "chapter-028",
       "number": 28,
       "title": "Вечером я сидел за столом в своей комнате, пытаясь сосредоточиться на учебнике физики, но сколько раз я ни перечитывал условия домашнего задания, всё это будто расплывалось перед глазами",
-      "file": "data/chapters/028.html"
+      "file": "data/chapters/028.html",
+      "artwork": "data/artwork/028.json"
     },
     {
       "id": "chapter-029",
       "number": 29,
       "title": "Перед последним уроком я снова пришёл к стенду с расписанием",
-      "file": "data/chapters/029.html"
+      "file": "data/chapters/029.html",
+      "artwork": "data/artwork/029.json"
     },
     {
       "id": "chapter-030",
       "number": 30,
       "title": "Коридоры опустели быстрее, чем обычно",
-      "file": "data/chapters/030.html"
+      "file": "data/chapters/030.html",
+      "artwork": "data/artwork/030.json"
     },
     {
       "id": "chapter-031",
       "number": 31,
       "title": "Шли молча",
-      "file": "data/chapters/031.html"
+      "file": "data/chapters/031.html",
+      "artwork": "data/artwork/031.json"
     },
     {
       "id": "chapter-032",
       "number": 32,
       "title": "Мы зашли в лифт, я рефлекторно нажал на шестой",
-      "file": "data/chapters/032.html"
+      "file": "data/chapters/032.html",
+      "artwork": "data/artwork/032.json"
     },
     {
       "id": "chapter-033",
       "number": 33,
       "title": "На следующий день я проснулся рано — слишком рано для субботы",
-      "file": "data/chapters/033.html"
+      "file": "data/chapters/033.html",
+      "artwork": "data/artwork/033.json"
     },
     {
       "id": "chapter-034",
       "number": 34,
       "title": "Я направился к дому Максима",
-      "file": "data/chapters/034.html"
+      "file": "data/chapters/034.html",
+      "artwork": "data/artwork/034.json"
     },
     {
       "id": "chapter-035",
       "number": 35,
       "title": "Звук был подобен взрыву",
-      "file": "data/chapters/035.html"
+      "file": "data/chapters/035.html",
+      "artwork": "data/artwork/035.json"
     },
     {
       "id": "chapter-036",
       "number": 36,
       "title": "Мы стояли на улице возле подъезда",
-      "file": "data/chapters/036.html"
+      "file": "data/chapters/036.html",
+      "artwork": "data/artwork/036.json"
     },
     {
       "id": "chapter-037",
       "number": 37,
       "title": "Максим нажал на кнопку с номером квартиры на домофоне",
-      "file": "data/chapters/037.html"
+      "file": "data/chapters/037.html",
+      "artwork": "data/artwork/037.json"
     },
     {
       "id": "chapter-038",
       "number": 38,
       "title": "На улице пахло весной",
-      "file": "data/chapters/038.html"
+      "file": "data/chapters/038.html",
+      "artwork": "data/artwork/038.json"
     },
     {
       "id": "chapter-039",
       "number": 39,
       "title": "На следующий день мы собрались у Максима",
-      "file": "data/chapters/039.html"
+      "file": "data/chapters/039.html",
+      "artwork": "data/artwork/039.json"
     },
     {
       "id": "chapter-040",
       "number": 40,
       "title": "Чиркнула зажигалка",
-      "file": "data/chapters/040.html"
+      "file": "data/chapters/040.html",
+      "artwork": "data/artwork/040.json"
     },
     {
       "id": "chapter-041",
       "number": 41,
       "title": "Максим первым нарушил молчание",
-      "file": "data/chapters/041.html"
+      "file": "data/chapters/041.html",
+      "artwork": "data/artwork/041.json"
     },
     {
       "id": "chapter-042",
       "number": 42,
       "title": "Наступил понедельник",
-      "file": "data/chapters/042.html"
+      "file": "data/chapters/042.html",
+      "artwork": "data/artwork/042.json"
     },
     {
       "id": "chapter-043",
       "number": 43,
       "title": "Мы вышли вместе с Варварой и на выходе со школьного двора встретили Максима и Костю",
-      "file": "data/chapters/043.html"
+      "file": "data/chapters/043.html",
+      "artwork": "data/artwork/043.json"
     },
     {
       "id": "chapter-044",
       "number": 44,
       "title": "Домофон издал характерный звук, и дверь открылась",
-      "file": "data/chapters/044.html"
+      "file": "data/chapters/044.html",
+      "artwork": "data/artwork/044.json"
     },
     {
       "id": "chapter-045",
       "number": 45,
       "title": "Утром было пасмурно",
-      "file": "data/chapters/045.html"
+      "file": "data/chapters/045.html",
+      "artwork": "data/artwork/045.json"
     },
     {
       "id": "chapter-046",
       "number": 46,
       "title": "После школы мы все вместе вышли со двора",
-      "file": "data/chapters/046.html"
+      "file": "data/chapters/046.html",
+      "artwork": "data/artwork/046.json"
     },
     {
       "id": "chapter-047",
       "number": 47,
       "title": "Я сидел у окна троллейбуса и смотрел в окно",
-      "file": "data/chapters/047.html"
+      "file": "data/chapters/047.html",
+      "artwork": "data/artwork/047.json"
     },
     {
       "id": "chapter-048",
       "number": 48,
       "title": "Обратно решил идти к Комсомольской, но не вдоль набережной, а чуть поднявшись от реки, свернуть на улицу вправо и там выйти через Аллею Героев",
-      "file": "data/chapters/048.html"
+      "file": "data/chapters/048.html",
+      "artwork": "data/artwork/048.json"
     },
     {
       "id": "chapter-049",
       "number": 49,
       "title": "Обессиленный, я влетел в свою квартиру, закрыл дверь и прислонился к ней спиной",
-      "file": "data/chapters/049.html"
+      "file": "data/chapters/049.html",
+      "artwork": "data/artwork/049.json"
     },
     {
       "id": "chapter-050",
       "number": 50,
       "title": "Вечером скрип ключа в замке входной двери заставил меня вздрогнуть",
-      "file": "data/chapters/050.html"
+      "file": "data/chapters/050.html",
+      "artwork": "data/artwork/050.json"
     },
     {
       "id": "chapter-051",
       "number": 51,
       "title": "Утром я стоял у подъезда Максима и ждал его",
-      "file": "data/chapters/051.html"
+      "file": "data/chapters/051.html",
+      "artwork": "data/artwork/051.json"
     },
     {
       "id": "chapter-052",
       "number": 52,
       "title": "Когда прозвенел последний звонок, школа наполнилась шумом расходящихся по домам учеников, смехом и обрывками разговоров",
-      "file": "data/chapters/052.html"
+      "file": "data/chapters/052.html",
+      "artwork": "data/artwork/052.json"
     },
     {
       "id": "chapter-053",
       "number": 53,
       "title": "Первым не выдержал Максим",
-      "file": "data/chapters/053.html"
+      "file": "data/chapters/053.html",
+      "artwork": "data/artwork/053.json"
     },
     {
       "id": "chapter-054",
       "number": 54,
       "title": "— Первый путь, — пробормотал Костя, сверяясь с телефоном",
-      "file": "data/chapters/054.html"
+      "file": "data/chapters/054.html",
+      "artwork": "data/artwork/054.json"
     },
     {
       "id": "chapter-055",
       "number": 55,
       "title": "Шли молча",
-      "file": "data/chapters/055.html"
+      "file": "data/chapters/055.html",
+      "artwork": "data/artwork/055.json"
     },
     {
       "id": "chapter-056",
       "number": 56,
       "title": "Проснулся без будильника",
-      "file": "data/chapters/056.html"
+      "file": "data/chapters/056.html",
+      "artwork": "data/artwork/056.json"
     },
     {
       "id": "chapter-057",
       "number": 57,
       "title": "Мы уже проходили железнодорожный мост, когда я наконец спросил Максима:",
-      "file": "data/chapters/057.html"
+      "file": "data/chapters/057.html",
+      "artwork": "data/artwork/057.json"
     },
     {
       "id": "chapter-058",
       "number": 58,
       "title": "Толпа с Брода, как единый, но шумный организм, подходила к зданию Дома Офицеров",
-      "file": "data/chapters/058.html"
+      "file": "data/chapters/058.html",
+      "artwork": "data/artwork/058.json"
     },
     {
       "id": "chapter-059",
       "number": 59,
       "title": "Утренний воздух не казался мне таким враждебным, как в остальные дни",
-      "file": "data/chapters/059.html"
+      "file": "data/chapters/059.html",
+      "artwork": "data/artwork/059.json"
     },
     {
       "id": "chapter-060",
       "number": 60,
       "title": "День выдался насыщенным — мы только и успевали, что ходить от кабинета к кабинету",
-      "file": "data/chapters/060.html"
+      "file": "data/chapters/060.html",
+      "artwork": "data/artwork/060.json"
     },
     {
       "id": "chapter-061",
       "number": 61,
       "title": "Вечером я сидел в своей комнате и читал учебник",
-      "file": "data/chapters/061.html"
+      "file": "data/chapters/061.html",
+      "artwork": "data/artwork/061.json"
     },
     {
       "id": "chapter-062",
       "number": 62,
       "title": "Погода на улице была по-весеннему свежей",
-      "file": "data/chapters/062.html"
+      "file": "data/chapters/062.html",
+      "artwork": "data/artwork/062.json"
     },
     {
       "id": "chapter-063",
       "number": 63,
       "title": "Мы стояли на рыхлой и влажной земле",
-      "file": "data/chapters/063.html"
+      "file": "data/chapters/063.html",
+      "artwork": "data/artwork/063.json"
     },
     {
       "id": "chapter-064",
       "number": 64,
       "title": "Вечер наступил незаметно",
-      "file": "data/chapters/064.html"
+      "file": "data/chapters/064.html",
+      "artwork": "data/artwork/064.json"
     },
     {
       "id": "chapter-065",
       "number": 65,
       "title": "Утром я повернулся на бок, отворачиваясь от уличного света",
-      "file": "data/chapters/065.html"
+      "file": "data/chapters/065.html",
+      "artwork": "data/artwork/065.json"
     },
     {
       "id": "chapter-066",
       "number": 66,
       "title": "Я сходил в душ, позавтракал и вернулся в комнату",
-      "file": "data/chapters/066.html"
+      "file": "data/chapters/066.html",
+      "artwork": "data/artwork/066.json"
     },
     {
       "id": "chapter-067",
       "number": 67,
       "title": "Перед дверью близнецов нерешительно остановился",
-      "file": "data/chapters/067.html"
+      "file": "data/chapters/067.html",
+      "artwork": "data/artwork/067.json"
     },
     {
       "id": "chapter-068",
       "number": 68,
       "title": "Дома меня встретили сдержанно",
-      "file": "data/chapters/068.html"
+      "file": "data/chapters/068.html",
+      "artwork": "data/artwork/068.json"
     },
     {
       "id": "chapter-069",
       "number": 69,
       "title": "— Папку с документами не забудь",
-      "file": "data/chapters/069.html"
+      "file": "data/chapters/069.html",
+      "artwork": "data/artwork/069.json"
     },
     {
       "id": "chapter-070",
       "number": 70,
       "title": "Мы вышли со школьного двора и у самого забора остановились",
-      "file": "data/chapters/070.html"
+      "file": "data/chapters/070.html",
+      "artwork": "data/artwork/070.json"
     },
     {
       "id": "chapter-071",
       "number": 71,
       "title": "После школы мы встретились на выходе",
-      "file": "data/chapters/071.html"
+      "file": "data/chapters/071.html",
+      "artwork": "data/artwork/071.json"
     },
     {
       "id": "chapter-072",
       "number": 72,
       "title": "Сначала пришлось разобраться с экипировкой",
-      "file": "data/chapters/072.html"
+      "file": "data/chapters/072.html",
+      "artwork": "data/artwork/072.json"
     },
     {
       "id": "chapter-073",
       "number": 73,
       "title": "Внутри сразу стало холоднее",
-      "file": "data/chapters/073.html"
+      "file": "data/chapters/073.html",
+      "artwork": "data/artwork/073.json"
     },
     {
       "id": "chapter-074",
       "number": 74,
       "title": "Мы шли через горсад",
-      "file": "data/chapters/074.html"
+      "file": "data/chapters/074.html",
+      "artwork": "data/artwork/074.json"
     },
     {
       "id": "chapter-075",
       "number": 75,
       "title": "Несколько дней после коллектора прошли спокойно",
-      "file": "data/chapters/075.html"
+      "file": "data/chapters/075.html",
+      "artwork": "data/artwork/075.json"
     },
     {
       "id": "chapter-076",
       "number": 76,
       "title": "В субботу Костя предложил сходить к Волге",
-      "file": "data/chapters/076.html"
+      "file": "data/chapters/076.html",
+      "artwork": "data/artwork/076.json"
     },
     {
       "id": "chapter-077",
       "number": 77,
       "title": "Мы шли по району, провожая Варвару",
-      "file": "data/chapters/077.html"
+      "file": "data/chapters/077.html",
+      "artwork": "data/artwork/077.json"
     },
     {
       "id": "chapter-078",
       "number": 78,
       "title": "В воскресенье утром отец попросил меня снять деньги в банкомате",
-      "file": "data/chapters/078.html"
+      "file": "data/chapters/078.html",
+      "artwork": "data/artwork/078.json"
     },
     {
       "id": "chapter-079",
       "number": 79,
       "title": "Я даже невольно оглянулся, словно мог увидеть источник этого запаха в темноте",
-      "file": "data/chapters/079.html"
+      "file": "data/chapters/079.html",
+      "artwork": "data/artwork/079.json"
     },
     {
       "id": "chapter-080",
       "number": 80,
       "title": "— Вот тут я вышел из банка и пошёл к трамвайной остановке, — сказал я",
-      "file": "data/chapters/080.html"
+      "file": "data/chapters/080.html",
+      "artwork": "data/artwork/080.json"
     },
     {
       "id": "chapter-081",
       "number": 81,
       "title": "После школы мы пошли провожать Варвару в художественную школу",
-      "file": "data/chapters/081.html"
+      "file": "data/chapters/081.html",
+      "artwork": "data/artwork/081.json"
     },
     {
       "id": "chapter-082",
       "number": 82,
       "title": "Отец попросил после школы забрать распечатанный проект в типографии",
-      "file": "data/chapters/082.html"
+      "file": "data/chapters/082.html",
+      "artwork": "data/artwork/082.json"
     },
     {
       "id": "chapter-083",
       "number": 83,
       "title": "Я шёл, не особо разбирая дорогу",
-      "file": "data/chapters/083.html"
+      "file": "data/chapters/083.html",
+      "artwork": "data/artwork/083.json"
     },
     {
       "id": "chapter-084",
       "number": 84,
       "title": "Пробный экзамен по математике оказался утомительнее, чем я ожидал",
-      "file": "data/chapters/084.html"
+      "file": "data/chapters/084.html",
+      "artwork": "data/artwork/084.json"
     },
     {
       "id": "chapter-085",
       "number": 85,
       "title": "Варвара открыла дверь и пропустила меня вперёд",
-      "file": "data/chapters/085.html"
+      "file": "data/chapters/085.html",
+      "artwork": "data/artwork/085.json"
     },
     {
       "id": "chapter-086",
       "number": 86,
       "title": "Это была рабочая суббота",
-      "file": "data/chapters/086.html"
+      "file": "data/chapters/086.html",
+      "artwork": "data/artwork/086.json"
     }
   ]
 }

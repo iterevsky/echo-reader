@@ -17,7 +17,7 @@ const SAVE_DELAY = 280;
 const SWIPE_THRESHOLD = 78;
 const TRANSITION_DELAY = 430;
 
-export function createReaderScreen(root, { onBack, onCurrentChapterChanged, onSettingsOpen, onSettingsClose, onResetProgress, onCheckDownloads, onFullDownload, onDownloadInfo }) {
+export function createReaderScreen(root, { onBack, onCurrentChapterChanged, onSettingsOpen, onSettingsClose, onResetProgress, onCheckDownloads, onFullDownload, onDownloadInfo, onDensityChange }) {
   const scrollArea = root.querySelector('#reader-scroll');
   const numberHeading = root.querySelector('#reader-chapter-number');
   const titleHeading = root.querySelector('#reader-chapter-title');
@@ -70,7 +70,7 @@ export function createReaderScreen(root, { onBack, onCurrentChapterChanged, onSe
   resumeDialog?.addEventListener('cancel',event=>{event.preventDefault();closeResume();});
 
   const artistic=createArtisticEngine(root,scrollArea,root.querySelector('.reader-chapter-heading'),textContainer,mutate=>{
-    if(!currentChapter||restoringPosition){mutate();return;}
+    if(contentsSettings||!currentChapter||restoringPosition){mutate();return;}
     const anchor=captureReadingAnchor()||lastKnownAnchor;
     mutate();
     artistic.refreshDimensions();
@@ -86,6 +86,7 @@ export function createReaderScreen(root, { onBack, onCurrentChapterChanged, onSe
   let transitionTimer = null;
   let chapterRequest = 0;
   let settingsOpen = false;
+  let contentsSettings = false;
   let previousFocusedElement = null;
   let lastKnownAnchor = null;
   let resizeTimer = null;
@@ -143,7 +144,7 @@ export function createReaderScreen(root, { onBack, onCurrentChapterChanged, onSe
   }
 
   function captureReadingAnchor() {
-    if (!currentChapter || !textContainer.children.length) return null;
+    if (contentsSettings || !currentChapter || !textContainer.children.length) return null;
     if (paged()) return pager.capture();
     if (settingsOpen && lastKnownAnchor) return lastKnownAnchor;
     const artAnchor = artistic.capture(); if (artAnchor) return artAnchor;
@@ -282,7 +283,7 @@ export function createReaderScreen(root, { onBack, onCurrentChapterChanged, onSe
   }
 
   function savePosition() {
-    if (!currentChapter || restoringPosition || !root.classList.contains('is-active')) return;
+    if (contentsSettings || !currentChapter || restoringPosition || !root.classList.contains('is-active')) return;
 
     const anchor = captureReadingAnchor() || lastKnownAnchor;
     if (anchor) lastKnownAnchor = anchor;
@@ -296,7 +297,7 @@ export function createReaderScreen(root, { onBack, onCurrentChapterChanged, onSe
   }
 
   function markReadAtEnd() {
-    if (!currentChapter || restoringPosition || !root.classList.contains('is-active')) return;
+    if (contentsSettings || !currentChapter || restoringPosition || !root.classList.contains('is-active')) return;
 
     const last = textContainer.lastElementChild;
     const reachedEnd = paged() ? pager.atEnd() : last && last.getBoundingClientRect().bottom <= scrollArea.getBoundingClientRect().bottom + 18;
@@ -313,6 +314,7 @@ export function createReaderScreen(root, { onBack, onCurrentChapterChanged, onSe
 
   function applyReaderSettings(settings) {
     document.documentElement.dataset.echoTheme=settings.theme;
+    root.querySelector('[data-settings-density]').value=getState().density;
     root.dataset.readingMode = settings.readingMode;
     root.querySelector('[data-edition-description]').textContent={author:'Текст, иллюстрации и художественные эффекты. Звук только с разрешения.',classic:'Только текст, без художественных эффектов.',custom:'Выбери, какие элементы сопровождения оставить.'}[settings.edition];
     root.querySelectorAll('[data-sound-option]').forEach(el=>el.hidden=settings.edition==='classic'||(settings.edition==='custom'&&!settings.artSound));
@@ -379,7 +381,7 @@ export function createReaderScreen(root, { onBack, onCurrentChapterChanged, onSe
   function openSettings() {
     if (settingsOpen) return;
 
-    if (!lastKnownAnchor || saveTimer !== null) savePosition();
+    if (!contentsSettings && (!lastKnownAnchor || saveTimer !== null)) savePosition();
     settingsOpen = true;
     artistic.setPaused(true);
     root.classList.add('settings-preview');
@@ -416,7 +418,15 @@ export function createReaderScreen(root, { onBack, onCurrentChapterChanged, onSe
       previousFocusedElement.focus({ preventScroll: true });
     }
     previousFocusedElement = null;
-    if(getState().readerSettings.audioConsent===null)maybeConsent();
+    if(!contentsSettings && getState().readerSettings.audioConsent===null)maybeConsent();
+  }
+
+  function showContentsSettings() {
+    contentsSettings=true;
+    root.classList.add('is-active','contents-settings');
+    root.inert=false;root.setAttribute('aria-hidden','false');
+    artistic.setActive(false);
+    openSettings();
   }
 
   function setChapters(items) {
@@ -579,7 +589,8 @@ export function createReaderScreen(root, { onBack, onCurrentChapterChanged, onSe
     cancelPending();
     clearTimeout(consentTimer);if(consent?.open)consent.close();
     artistic.setActive(false);artistic.setPaused(false);
-    root.classList.remove('is-active', 'controls-visible');
+    root.classList.remove('is-active', 'controls-visible','contents-settings');
+    contentsSettings=false;
     root.setAttribute('aria-hidden', 'true');
     root.inert = true;
     hideControls();
@@ -646,6 +657,7 @@ export function createReaderScreen(root, { onBack, onCurrentChapterChanged, onSe
   }
 
   function applyLiveSettings(update) {
+    if(contentsSettings){const updated=update();applyReaderSettings(updated.readerSettings);return;}
     const anchor = captureReadingAnchor() || lastKnownAnchor;
     const wasPaged = paged();
     const updated = update();
@@ -703,6 +715,7 @@ export function createReaderScreen(root, { onBack, onCurrentChapterChanged, onSe
     if(window.confirm('Вернуть настройки к значениям по умолчанию? Место чтения сохранится.'))applyLiveSettings(resetReaderSettings);
   });
 
+  root.querySelector('[data-settings-density]').addEventListener('change',event=>onDensityChange?.(event.target.value));
   settingInputs.forEach((input) => {
     input.addEventListener('input', () => handleSettingChange(input));
   });
@@ -738,7 +751,7 @@ export function createReaderScreen(root, { onBack, onCurrentChapterChanged, onSe
   });
 
   scrollArea.addEventListener('scroll', () => {
-    if (paged() || restoringPosition || !root.classList.contains('is-active')) return;
+    if (contentsSettings || paged() || restoringPosition || !root.classList.contains('is-active')) return;
     if (!settingsOpen && root.classList.contains('controls-visible') && !document.activeElement?.closest('.reader-toolbar,.reader-footer')) hideControls();
     if (saveTimer !== null) window.clearTimeout(saveTimer);
 
@@ -821,7 +834,7 @@ export function createReaderScreen(root, { onBack, onCurrentChapterChanged, onSe
     const anchor = lastKnownAnchor;
 
     resizeTimer = window.setTimeout(() => {
-      if (anchor && currentChapter && !restoringPosition && root.classList.contains('is-active')) {
+      if (!contentsSettings && anchor && currentChapter && !restoringPosition && root.classList.contains('is-active')) {
         artistic.refreshDimensions();
         restoreReadingAnchor(anchor);
         artistic.schedule();
@@ -850,6 +863,8 @@ export function createReaderScreen(root, { onBack, onCurrentChapterChanged, onSe
     cancelPending,
     openSettings,
     closeSettings,
+    showContentsSettings,
+    isContentsSettings: () => contentsSettings,
     discardProgress: () => {hide();currentChapter=null;currentIndex=-1;lastKnownAnchor=null;updateNavigationButtons();},
     getCurrentChapter: () => currentChapter
   };

@@ -126,6 +126,7 @@ import { createReaderScreen } from '../screens/reader.js';
   let infoOpen = false;
   let infoReturnScroll = null;
   let infoTrigger = null;
+  let contentsSettingsReturn = false;
   const info = createInfoScreen(document.querySelector('#info-screen'), { onBack: () => navigation.back() });
   contentsRoot.querySelectorAll('[data-info-open]').forEach(button => button.addEventListener('click', () => {
     if (openingChapter || navigation.current()?.screen !== 'contents') return;
@@ -135,6 +136,13 @@ import { createReaderScreen } from '../screens/reader.js';
     navigation.push(button.dataset.infoOpen);
     renderRoute({ screen: button.dataset.infoOpen }).catch(showNavigationError);
   }));
+
+  const contentsSettingsButton=contentsRoot.querySelector('[data-contents-settings]');
+  contentsSettingsButton.addEventListener('click',()=>{
+    if(openingChapter||navigation.current()?.screen!=='contents')return;
+    contents.closeMenus();navigation.push('contents-settings');
+    renderRoute({screen:'contents-settings'}).catch(showNavigationError);
+  });
 
   function showNavigationError(error) {
     console.error('ЭХО: ошибка навигации.', error);
@@ -169,11 +177,14 @@ import { createReaderScreen } from '../screens/reader.js';
       }
     },
     onSettingsClose: () => {
-      if (navigation.current()?.screen === 'settings') navigation.back();
+      if (['settings','contents-settings'].includes(navigation.current()?.screen)) navigation.back();
       else reader.closeSettings();
     },
     onResetProgress: () => {
+      const fromContents=reader.isContentsSettings();
       reader.discardProgress();resetProgress();contents.refreshState();
+      contentsRoot.querySelector('#contents-scroll').scrollTop=0;
+      if(fromContents)contentsSettingsReturn=true;
       resettingProgress=true;navigation.back();
     },
     onCheckDownloads: async () => {
@@ -182,6 +193,7 @@ import { createReaderScreen } from '../screens/reader.js';
     },
     onFullDownload: async () => startOfflineManager(await ensureCatalog(),offlineStatus,{full:true}),
     onDownloadInfo: editionDownloadInfo,
+    onDensityChange: density=>contents.setDensity(density),
     onCurrentChapterChanged: chapter => {
       if(chapter)prefetchEditionChapter(chapter.id);
       contents.refreshState();
@@ -220,6 +232,8 @@ import { createReaderScreen } from '../screens/reader.js';
       if(route.screen!=='contents'){navigation.replace('contents');route={screen:'contents'};}
     }
     const returningFromInfo = infoOpen;
+    const returningFromContentsSettings = contentsSettingsReturn || reader.isContentsSettings();
+    if(route.screen!=='contents-settings') contentsSettingsReturn=false;
     if (isInfoRoute(route.screen)) {
       reader.hide(); contents.hide(); hideSplashImmediately();
       infoOpen = true; info.show(route.screen); phase = 'info'; return;
@@ -242,8 +256,14 @@ import { createReaderScreen } from '../screens/reader.js';
       const chapters = await ensureCatalog();
       if (epoch !== navigationEpoch) return;
       hideSplashImmediately();
+      if (route.screen === 'contents-settings') {
+        contents.show({preserveScroll:true});
+        contentsRoot.inert=true;contentsRoot.setAttribute('aria-hidden','true');
+        contentsSettingsReturn=true;reader.showContentsSettings();phase='contents-settings';return;
+      }
       if (route.screen === 'contents') {
-        contents.show({ preserveScroll: returningFromInfo });
+        contents.show({ preserveScroll: returningFromInfo || returningFromContentsSettings });
+        if(returningFromContentsSettings)contentsSettingsButton.focus({preventScroll:true});
         if (returningFromInfo) {
           if (infoReturnScroll !== null) contentsRoot.querySelector('#contents-scroll').scrollTop = infoReturnScroll;
           const target = infoTrigger?.closest('details')?.querySelector('summary') || infoTrigger;

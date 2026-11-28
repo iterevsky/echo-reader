@@ -1,6 +1,6 @@
 // One history entry per UI level; page/chapter changes replace the reader entry.
 const KEY = 'echoNavigation';
-const SCREENS = new Set(['splash', 'contents', 'reader', 'settings', 'about', 'author', 'feedback']);
+const SCREENS = new Set(['splash', 'contents', 'reader', 'settings', 'contents-settings', 'about', 'author', 'feedback']);
 
 export function parseRoute(value) {
   const route = value?.[KEY];

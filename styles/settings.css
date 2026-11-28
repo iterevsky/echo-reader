@@ -40,3 +40,12 @@
 [data-echo-theme="light"] :is(.settings-tabs button[aria-pressed="true"],.reader-alignment-control button[aria-pressed="true"]){background:#ded0be;color:#493727;border-color:#a48c70;}
 [data-echo-theme="light"] .settings-danger{color:#97463b;}
 [data-echo-theme="light"] .install-link{color:#51463b;border-color:#c9baa8;}
+
+/* The same settings panel, opened directly from the contents without opening a chapter. */
+.reader-screen.contents-settings {z-index:6;background:transparent!important;}
+.reader-screen.contents-settings > :is(.reader-scroll,.reader-toolbar,.reader-footer,.reader-transition) {visibility:hidden;pointer-events:none;}
+.reader-screen.contents-settings .reader-settings-backdrop {align-items:flex-end;background:#0005;}
+.reader-screen.contents-settings .reader-settings {max-height:88dvh;max-height:88svh;}
+.reader-screen.contents-settings .reader-settings__body {display:block;}
+.reader-screen.contents-settings .settings-tabs {grid-template-columns:repeat(2,minmax(0,1fr));}
+@media(min-width:760px){.reader-screen.contents-settings .reader-settings-backdrop {align-items:center;padding:20px;}.reader-screen.contents-settings .reader-settings {border-radius:8px;max-height:88vh;}}
