@@ -191,3 +191,32 @@
   .contents-settings-button svg {display:none;}
   .contents-actions .edition-menu summary::after {display:none;}
 }
+
+/* v16: quiet, compact navigation; consistent single-line chapter rows. */
+.contents-header {min-height:52px;padding:4px 0;gap:8px;}
+.contents-heading .contents-eyebrow {display:none;}
+.contents-heading h1 {font:400 clamp(20px,4vw,27px)/1.15 Georgia,serif;}
+.contents-actions {gap:0;}
+.contents-actions .edition-menu summary,.contents-settings-button {min-height:44px;padding:0 9px;font:12px/1.2 Arial,sans-serif;color:var(--color-text);}
+.contents-settings-button svg {display:none;}
+.contents-actions .edition-menu summary::after,.contents-actions .edition-menu[open] summary::after {content:none;}
+.contents-actions .edition-menu summary::before {content:'';width:5px;height:5px;border-right:1px solid currentColor;border-bottom:1px solid currentColor;transform:rotate(45deg);order:1;margin-left:3px;}
+.contents-actions .edition-menu[open] summary::before {transform:rotate(225deg);}
+.contents-settings-button {border-left:1px solid #a99b8a35;}
+.contents-actions .edition-menu nav,.density-control {border-radius:5px;}
+.contents-range-bar {gap:0;}
+.range-button {min-height:36px;flex:1 0 49px;}
+.range-button.is-active {background:transparent;font-weight:600;}
+.density-menu summary {color:var(--color-muted);}
+.contents-scroll {padding-top:5px;}
+.contents-screen .chapter-entry {align-items:center;}
+.contents-screen .chapter-title,.contents-screen[data-density] .chapter-title {flex:1 1 0;min-width:0;overflow:hidden;white-space:nowrap;overflow-wrap:normal;text-overflow:clip;font-size:15px;line-height:1.45;}
+@media (max-width:560px) {
+  .contents-heading h1 {font-size:21px;}
+  .contents-actions .edition-menu summary,.contents-settings-button {padding-inline:7px;font-size:12px;}
+  .contents-screen .chapter-title,.contents-screen[data-density] .chapter-title {font-size:15px;line-height:1.45;}
+}
+@media (max-width:350px) {
+  .contents-heading h1 {font-size:19px;}
+  .contents-actions .edition-menu summary,.contents-settings-button {padding-inline:5px;font-size:11px;}
+}

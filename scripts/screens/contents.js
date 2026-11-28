@@ -21,6 +21,41 @@ export function createContentsScreen(root, onOpenChapter) {
   let scrollSaveTimer = null;
   let activeRangeStart = null;
 
+  // Truncate at whitespace using the actual rendered font, never mid-word.
+  let titleFitFrame = 0;
+  function fitTitles() {
+    const range = document.createRange();
+    for (const title of list.querySelectorAll('.chapter-title')) {
+      const width = title.getBoundingClientRect().width;
+      if (width <= 0) continue;
+      const full = title.dataset.fullTitle;
+      if (full === undefined) continue;
+      const fits = value => {
+        title.textContent = value;
+        range.selectNodeContents(title);
+        return range.getBoundingClientRect().width <= width;
+      };
+      if (fits(full)) continue;
+      const words = full.trim().split(/\s+/u);
+      let low = 0, high = words.length - 1;
+      while (low < high) {
+        const mid = Math.ceil((low + high) / 2);
+        if (fits(words.slice(0, mid).join(' ') + '…')) low = mid;
+        else high = mid - 1;
+      }
+      title.textContent = low ? words.slice(0, low).join(' ') + '…' : '…';
+    }
+  }
+  function scheduleTitleFit() {
+    if (titleFitFrame) cancelAnimationFrame(titleFitFrame);
+    titleFitFrame = requestAnimationFrame(() => { titleFitFrame = 0; fitTitles(); });
+  }
+  if (typeof ResizeObserver !== 'undefined') {
+    new ResizeObserver(scheduleTitleFit).observe(list);
+  }
+  window.addEventListener('resize', scheduleTitleFit, { passive: true });
+  document.fonts?.ready.then(scheduleTitleFit);
+
   function setDensity(density) {
     if (!['compact','normal','spacious'].includes(density)) return;
     root.dataset.density = density;
@@ -130,7 +165,9 @@ export function createContentsScreen(root, onOpenChapter) {
 
       const title = document.createElement('span');
       title.className = 'chapter-title';
+      title.dataset.fullTitle = chapter.title;
       title.textContent = chapter.title;
+      button.title = chapter.title;
 
       button.append(number, title);
       button.addEventListener('click', () => onOpenChapter(chapter));
@@ -139,6 +176,7 @@ export function createContentsScreen(root, onOpenChapter) {
     });
 
     list.replaceChildren(fragment);
+    fitTitles();
     loadingMessage.hidden = true;
     buildRanges();
     updateCurrentAndReadStates();
@@ -195,6 +233,7 @@ export function createContentsScreen(root, onOpenChapter) {
     root.inert = false;
     root.setAttribute('aria-hidden', 'false');
     root.classList.add('is-active');
+    fitTitles();
     updateCurrentAndReadStates();
     const id = getState().currentChapterId;
     const current = [...list.querySelectorAll('[data-chapter-id]')].find(button => button.dataset.chapterId === id);

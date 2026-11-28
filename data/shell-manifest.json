@@ -1,9 +1,9 @@
 {
-  "build": "echo-shell-2026-11-28-v15",
+  "build": "echo-shell-2026-11-28-v16",
   "files": [
     {
       "file": "index.html",
-      "sha256": "4db0d36908b8e7a9159f5942de1e0e341ab104a1471524f7b8b39fd74421605d",
+      "sha256": "e4e8ba0b7cba058eb94d2d42bfaaf57196d5f112fed91a8b4ba95ee6e12032de",
       "bytes": 28066
     },
     {
@@ -58,8 +58,8 @@
     },
     {
       "file": "styles/contents.css",
-      "sha256": "daaf85fca07744acbd9824e965d168bde7e5588ec227f1d4a6bb731fd83ad65a",
-      "bytes": 6417
+      "sha256": "3797235e9c2d643cbd25abfab3dbc66dd77b0e265e690d0718721aa299f5dc35",
+      "bytes": 8398
     },
     {
       "file": "styles/reader.css",
@@ -143,8 +143,8 @@
     },
     {
       "file": "scripts/screens/contents.js",
-      "sha256": "d512a7c88d72a228e73111fe44c5c1dfeb52f5766a7c1fb47fc90ea3fed3d25a",
-      "bytes": 9333
+      "sha256": "6e590e94682d8226501614b769165aa5faff43c84a867b31253f464ef19360ab",
+      "bytes": 10839
     },
     {
       "file": "scripts/screens/reader.js",
