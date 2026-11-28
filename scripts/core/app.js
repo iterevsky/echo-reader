@@ -1,7 +1,8 @@
-import { getState } from './storage.js';
+import { getState, resetProgress } from './storage.js';
 import { createNavigation } from './navigation.js';
-import { activatePendingContentVersion, registerServiceWorker, startOfflineManager } from './offline.js';
+import { activatePendingContentVersion, registerServiceWorker, startOfflineManager, editionDownloadInfo, prefetchEditionChapter } from './offline.js';
 import { createContentsScreen } from '../screens/contents.js';
+import { createInfoScreen, isInfoRoute } from '../screens/info.js';
 import { createReaderScreen } from '../screens/reader.js';
 
 (() => {
@@ -121,6 +122,19 @@ import { createReaderScreen } from '../screens/reader.js';
   }
 
   let reader;
+  let resettingProgress=false;
+  let infoOpen = false;
+  let infoReturnScroll = null;
+  let infoTrigger = null;
+  const info = createInfoScreen(document.querySelector('#info-screen'), { onBack: () => navigation.back() });
+  contentsRoot.querySelectorAll('[data-info-open]').forEach(button => button.addEventListener('click', () => {
+    if (openingChapter || navigation.current()?.screen !== 'contents') return;
+    infoReturnScroll = contentsRoot.querySelector('#contents-scroll').scrollTop;
+    infoTrigger = button;
+    contentsRoot.querySelector('[data-edition-menu]')?.removeAttribute('open');
+    navigation.push(button.dataset.infoOpen);
+    renderRoute({ screen: button.dataset.infoOpen }).catch(showNavigationError);
+  }));
 
   function showNavigationError(error) {
     console.error('ЭХО: ошибка навигации.', error);
@@ -158,7 +172,18 @@ import { createReaderScreen } from '../screens/reader.js';
       if (navigation.current()?.screen === 'settings') navigation.back();
       else reader.closeSettings();
     },
+    onResetProgress: () => {
+      reader.discardProgress();resetProgress();contents.refreshState();
+      resettingProgress=true;navigation.back();
+    },
+    onCheckDownloads: async () => {
+      const chapters=await ensureCatalog();
+      await Promise.all([checkShellUpdate(true),startOfflineManager(chapters,offlineStatus)]);
+    },
+    onFullDownload: async () => startOfflineManager(await ensureCatalog(),offlineStatus,{full:true}),
+    onDownloadInfo: editionDownloadInfo,
     onCurrentChapterChanged: chapter => {
+      if(chapter)prefetchEditionChapter(chapter.id);
       contents.refreshState();
       if (navigation.current()?.screen === 'reader' && chapter) navigation.replace('reader', chapter.id);
     }
@@ -171,6 +196,7 @@ import { createReaderScreen } from '../screens/reader.js';
   }
 
   function returnToSplash() {
+    info.hide(); infoOpen = false;
     reader.hide();
     contents.hide();
     clearTimers();
@@ -188,6 +214,17 @@ import { createReaderScreen } from '../screens/reader.js';
   async function renderRoute(route) {
     const epoch = ++navigationEpoch;
     openingChapter = false;
+    if(resettingProgress){
+      if(route.screen==='reader'){navigation.back();return;}
+      resettingProgress=false;
+      if(route.screen!=='contents'){navigation.replace('contents');route={screen:'contents'};}
+    }
+    const returningFromInfo = infoOpen;
+    if (isInfoRoute(route.screen)) {
+      reader.hide(); contents.hide(); hideSplashImmediately();
+      infoOpen = true; info.show(route.screen); phase = 'info'; return;
+    }
+    info.hide(); infoOpen = false;
     if (route.screen === 'splash') { returnToSplash(); applyShellUpdateIfSafe(); return; }
 
     const chapter = reader.getCurrentChapter();
@@ -206,7 +243,12 @@ import { createReaderScreen } from '../screens/reader.js';
       if (epoch !== navigationEpoch) return;
       hideSplashImmediately();
       if (route.screen === 'contents') {
-        contents.show();
+        contents.show({ preserveScroll: returningFromInfo });
+        if (returningFromInfo) {
+          if (infoReturnScroll !== null) contentsRoot.querySelector('#contents-scroll').scrollTop = infoReturnScroll;
+          const target = infoTrigger?.closest('details')?.querySelector('summary') || infoTrigger;
+          (target || contentsRoot.querySelector('summary'))?.focus({ preventScroll: true });
+        }
         phase = 'contents';
         return;
       }

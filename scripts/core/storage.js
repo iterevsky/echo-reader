@@ -11,7 +11,16 @@ export const DEFAULT_READER_SETTINGS = Object.freeze({
   textWidth: 690,
   alignment: 'left',
   readingMode: 'scroll',
-  pageAnimation: 'slide'
+  pageAnimation: 'slide',
+  theme: 'dark',
+  reopen: 'position',
+  edition: 'author',
+  illustrations: true,
+  artMotion: true,
+  artSound: true,
+  audioConsent: null,
+  audioAuto: true,
+  audioVolume: 65,
 });
 
 const DEFAULT_STATE = {
@@ -43,6 +52,15 @@ function normalizeReaderSettings(value) {
     textWidth: clamp(source.textWidth, 520, 900, DEFAULT_READER_SETTINGS.textWidth),
     readingMode: source.readingMode === 'pages' ? 'pages' : 'scroll',
     pageAnimation: ['slide', 'fade', 'none'].includes(source.pageAnimation) ? source.pageAnimation : 'slide',
+    theme: source.theme === 'light' ? 'light' : 'dark',
+    reopen: source.reopen === 'cover' ? 'cover' : 'position',
+    edition: ['author','classic','custom'].includes(source.edition) ? source.edition : 'author',
+    illustrations: source.illustrations !== false,
+    artMotion: source.artMotion !== false,
+    artSound: source.artSound !== false,
+    audioConsent: typeof source.audioConsent === 'boolean' ? source.audioConsent : null,
+    audioAuto: source.audioAuto !== false,
+    audioVolume: clamp(source.audioVolume, 0, 100, 65),
     alignment: VALID_ALIGNMENTS.has(source.alignment)
       ? source.alignment
       : DEFAULT_READER_SETTINGS.alignment
@@ -66,6 +84,7 @@ function normalizeAnchor(value) {
     paragraphId: typeof value.paragraphId === 'string' ? value.paragraphId.slice(0, 200) : null,
     quote: typeof value.quote === 'string' ? value.quote.slice(0, 160) : null,
     quoteOffset: Number.isInteger(value.quoteOffset) && value.quoteOffset >= 0 ? Math.min(value.quoteOffset, 160) : null,
+    artworkId: typeof value.artworkId === 'string' ? value.artworkId.slice(0,100) : null,
     atStart: value.atStart === true,
     paragraphIndex,
     textOffset,
@@ -149,13 +168,12 @@ export function updateState(patch) {
   const next = normalizeState({ ...current, ...patch });
 
   try {
-    const oldValue = localStorage.getItem(STORAGE_KEY);
-    if (oldValue && parseStoredValue(oldValue)) {
-      try { localStorage.setItem(BACKUP_KEY, oldValue); }
-      catch (error) { console.warn('ЭХО: резервная копия не сохранена.', error); }
-    }
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
+    const serialized = JSON.stringify(next);
+    localStorage.setItem(STORAGE_KEY, serialized);
     volatileState = null;
+    // Mirror the latest confirmed state, not the state before a deliberate reset.
+    try { localStorage.setItem(BACKUP_KEY, serialized); }
+    catch (error) { console.warn('ЭХО: резервная копия не сохранена.', error); }
   } catch (error) {
     volatileState = next;
     console.warn('ЭХО: состояние сохранено только до закрытия приложения.', error);
@@ -175,7 +193,7 @@ export function updateReaderSettings(patch) {
 }
 
 export function resetReaderSettings() {
-  return updateState({ readerSettings: { ...DEFAULT_READER_SETTINGS } });
+  return updateState({ readerSettings: { ...DEFAULT_READER_SETTINGS, audioConsent: getState().readerSettings.audioConsent === null ? null : false } });
 }
 
 export function markChapterRead(chapterId) {

@@ -1,6 +1,6 @@
 {
-  "schemaVersion": 1,
-  "contentVersion": "3f2c24de1d3debdd2c90",
+  "schemaVersion": 2,
+  "contentVersion": "0234223351dacd3a01e2",
   "catalogSha256": "66b1ed8cd25e857d1fb4c1236291688fe297a602f842b45b22c265dcc37e6e70",
   "chapterCount": 86,
   "totalBytes": 1118470,
@@ -606,6 +606,27 @@
       "file": "data/chapters/086.html",
       "sha256": "a514fbcdde05ea43a7ca41be204e5c1910f6d4ba6e9c8d0c285cf9acf91ab6e5",
       "bytes": 27204
+    }
+  ],
+  "mediaBytes": 567914,
+  "media": [
+    {
+      "file": "assets/illustrations/frontispiece-cool.webp",
+      "sha256": "b31557833491a7b6093e11a3b1f206048cbbeeb4c5610e313f7e5ddebf41d7ed",
+      "bytes": 163774,
+      "chapters": []
+    },
+    {
+      "file": "assets/illustrations/frontispiece-neutral.webp",
+      "sha256": "63b0c5ff36b42260071e990e720f0896cf5029d2bef5a8ef06ece660694053fb",
+      "bytes": 203082,
+      "chapters": []
+    },
+    {
+      "file": "assets/illustrations/frontispiece-warm.webp",
+      "sha256": "799ee394ae44b78a1e394204b927e5ccad0223bdf200c2b3db638dbc8e1f1307",
+      "bytes": 201058,
+      "chapters": []
     }
   ]
 }

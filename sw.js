@@ -1,6 +1,6 @@
 /* ЭХО: Service Worker. BUILD_ID меняется при выпуске обновления оболочки. */
-const BUILD_ID = 'echo-shell-2026-11-28-v8-reading';
-const SHELL_CACHE = `echo-shell-${BUILD_ID}`;
+const BUILD_ID = 'echo-shell-2026-11-28-v13-rc1';
+const SHELL_CACHE = `echo-shell-${BUILD_ID}-${encodeURIComponent(new URL(self.registration.scope).pathname)}`;
 const META_CACHE = 'echo-meta-v1';
 const BOOTSTRAP_CACHE = 'echo-content-bootstrap-v1';
 const CONTENT_CACHE_PREFIX = 'echo-content-';
@@ -21,6 +21,9 @@ const coreFiles = [
   'styles/base.css',
   'styles/contents.css',
   'styles/reader.css',
+  'styles/settings.css',
+  'styles/info.css',
+  'scripts/screens/info.js',
   'styles/offline.css',
   'scripts/core/app.js',
   'scripts/core/storage.js',
@@ -28,6 +31,10 @@ const coreFiles = [
   'scripts/core/anchors.js',
   'scripts/core/pagination.js',
   'scripts/core/artwork.js',
+  'scripts/core/artistic-engine.js',
+  'assets/illustrations/frontispiece-cool.webp',
+  'assets/illustrations/frontispiece-neutral.webp',
+  'assets/illustrations/frontispiece-warm.webp',
   'scripts/core/offline.js',
   'scripts/screens/contents.js',
   'scripts/screens/reader.js',
@@ -59,7 +66,14 @@ async function getActiveContentCache() {
 
 async function getShellResponse(request) {
   const cache = await caches.open(SHELL_CACHE);
-  return cache.match(request, { ignoreSearch: true });
+  const relativePath = new URL(request.url).pathname.slice(new URL(scopeUrl).pathname.length);
+  if (!coreFiles.includes(relativePath)) return null;
+  let manifest;try{manifest=await (await cache.match(url('data/shell-manifest.json')))?.json();}catch{return new Response('Манифест оболочки повреждён.',{status:503});}
+  const item = manifest?.files?.find(x=>x.file===relativePath);
+  if(!item) return new Response('Оболочка не прошла проверку.',{status:503});
+  const saved = await cache.match(url(relativePath));
+  if(await isVerifiedChapter(saved,item))return saved;
+  try{const fresh=await fetch(new Request(url(relativePath),{cache:'no-store'}));if(!fresh.ok||!await isVerifiedChapter(fresh,item))throw Error('checksum');await cache.put(url(relativePath),fresh.clone()).catch(()=>{});return fresh;}catch{return new Response('Файл приложения повреждён или недоступен.',{status:503});}
 }
 
 async function getExpectedChapter(request, activeCache) {
@@ -167,8 +181,18 @@ async function respondWithVersionedData(request) {
 self.addEventListener('install', (event) => {
   event.waitUntil((async () => {
     const cache = await caches.open(SHELL_CACHE);
-    const requests = coreFiles.map((file) => new Request(url(file), { cache: 'reload' }));
-    await cache.addAll(requests);
+    const manifestResponse = await fetch(new Request(url('data/shell-manifest.json'), {cache:'reload'}));
+    if(!manifestResponse.ok)throw Error('Shell manifest unavailable');
+    const manifestBytes=await manifestResponse.arrayBuffer();
+    const manifest=JSON.parse(new TextDecoder().decode(manifestBytes));
+    if(manifest.build!==BUILD_ID||!Array.isArray(manifest.files)||manifest.files.length!==coreFiles.length||new Set(manifest.files.map(x=>x.file)).size!==coreFiles.length||coreFiles.some(p=>!manifest.files.some(x=>x.file===p&&/^[a-f0-9]{64}$/.test(x.sha256)&&Number.isSafeInteger(x.bytes)&&x.bytes>0)))throw Error('Shell manifest mismatch');
+    // A deployment can be partially propagated by the CDN. Reject the
+    // entire install if even one file belongs to a different build.
+    let next=0;
+    async function worker(){while(next<manifest.files.length){const item=manifest.files[next++];const r=await fetch(new Request(url(item.file),{cache:'reload'}));if(!r.ok||!await isVerifiedChapter(r,item))throw Error('Shell integrity: '+item.file);await cache.put(url(item.file),r);}}
+    const results=await Promise.allSettled([worker(),worker(),worker()]);
+    if(results.some(r=>r.status==='rejected'))throw Error('Shell integrity failed');
+    await cache.put(url('data/shell-manifest.json'),new Response(manifestBytes,{headers:{'Content-Type':'application/json'}}));
     // После полной загрузки оболочки не ждём закрытия всех вкладок.
     await self.skipWaiting();
   })());
@@ -176,16 +200,7 @@ self.addEventListener('install', (event) => {
 
 self.addEventListener('activate', (event) => {
   event.waitUntil((async () => {
-    const keys = await caches.keys();
-    const shellKeys = keys
-      .filter((key) => key.startsWith('echo-shell-'))
-      .sort()
-      .reverse();
-    const keep = new Set(shellKeys.slice(0, 2));
-    keep.add(SHELL_CACHE);
-    await Promise.all(shellKeys
-      .filter((key) => !keep.has(key))
-      .map((key) => caches.delete(key)));
+    // Retain older caches until a separate safe cleanup policy is implemented.
     await self.clients.claim();
   })());
 });

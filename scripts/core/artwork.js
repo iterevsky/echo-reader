@@ -1,5 +1,4 @@
-// Optional, versioned sidecar. This package validates metadata only;
-// no artwork or audio is rendered until the artistic engine is implemented.
+// Optional, versioned artwork sidecar.
 const EFFECTS = new Set(['V01','V02','V03','V04','V05']);
 const AUDIO_TYPES = new Set(['A01','A02','A03']);
 const IMAGE = /^assets\/illustrations\/[A-Za-z0-9][A-Za-z0-9_-]*\.(webp|avif|png|jpe?g)$/i;
@@ -17,6 +16,7 @@ function checkMedia(scene) {
   assert(!('audio' in scene) || (scene.audio && AUDIO.test(scene.audio.file) &&
     AUDIO_TYPES.has(scene.audio.type)), 'Недопустимое описание звука.');
   checkEffects(scene.effects);
+  assert(scene.mood === undefined || ['cool','neutral','warm'].includes(scene.mood), 'Неизвестное световое состояние.');
   assert(scene.afterReveal === undefined || ['still','animate'].includes(scene.afterReveal), 'Неизвестное поведение после проявления.');
 }
 export function validateArtwork(value, chapterId, paragraphIds) {
@@ -24,14 +24,14 @@ export function validateArtwork(value, chapterId, paragraphIds) {
     'Художественная разметка не соответствует главе.');
   if (value.cover != null) {
     checkMedia(value.cover);
-    assert(IMAGE.test(value.cover.image), 'Нет изображения вступления.');
+    assert(value.cover.image || value.cover.mood, 'Нет изображения или светового состояния вступления.');
   }
   assert(Array.isArray(value.scenes), 'Список сцен отсутствует.');
   const ids = new Set();
   for (const scene of value.scenes) {
     checkMedia(scene);
     assert(typeof scene.id === 'string' && /^[a-zA-Z0-9_-]+$/.test(scene.id) &&
-      !ids.has(scene.id), 'Неверный или повторный ID сцены.');
+      scene.id !== 'cover' && !ids.has(scene.id), 'Неверный или повторный ID сцены.');
     ids.add(scene.id);
     assert(typeof scene.after === 'string' && paragraphIds.has(scene.after),
       'Сцена не привязана к существующему абзацу: ' + scene.id);

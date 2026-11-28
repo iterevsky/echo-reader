@@ -1,6 +1,6 @@
 import { getState, updateState } from '../core/storage.js';
 
-const CATALOG_URL = './data/chapters.json';
+import { loadEditionCatalog } from '../core/offline.js';
 const RANGE_SIZE = 25;
 
 export function createContentsScreen(root, onOpenChapter) {
@@ -38,6 +38,8 @@ export function createContentsScreen(root, onOpenChapter) {
 
       button.classList.toggle('is-current', isCurrent);
       button.classList.toggle('is-read', isRead);
+      const chapter=chapters.find(c=>c.id===button.dataset.chapterId);
+      if(chapter)button.setAttribute('aria-label', `Глава ${chapter.number}. ${chapter.title}${isRead?', прочитана':''}`);
 
       if (isCurrent) {
         button.setAttribute('aria-current', 'page');
@@ -138,12 +140,7 @@ export function createContentsScreen(root, onOpenChapter) {
     loadingMessage.hidden = false;
     loadingMessage.textContent = 'Загружаем содержание…';
 
-    const response = await fetch(CATALOG_URL, { cache: 'no-store' });
-    if (!response.ok) {
-      throw new Error(`Не удалось загрузить каталог глав (${response.status}).`);
-    }
-
-    const catalog = await response.json();
+    const catalog = await loadEditionCatalog();
     if (!catalog || !Array.isArray(catalog.chapters) || catalog.chapters.length === 0) {
       throw new Error('Каталог глав пуст или имеет неверный формат.');
     }
@@ -182,14 +179,15 @@ export function createContentsScreen(root, onOpenChapter) {
     return chapters;
   }
 
-  function show() {
+  function show({ preserveScroll = false } = {}) {
     root.inert = false;
     root.setAttribute('aria-hidden', 'false');
     root.classList.add('is-active');
     updateCurrentAndReadStates();
     const id = getState().currentChapterId;
     const current = [...list.querySelectorAll('[data-chapter-id]')].find(button => button.dataset.chapterId === id);
-    if (current) current.scrollIntoView({ block: 'nearest', behavior: 'instant' });
+    if (current && !preserveScroll) { current.scrollIntoView({ block: 'nearest', behavior: 'instant' }); current.focus({preventScroll:true}); }
+    else if (!preserveScroll) scrollArea.focus({preventScroll:true});
     updateRangeFromScroll();
   }
 

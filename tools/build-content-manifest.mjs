@@ -49,15 +49,37 @@ for (const chapter of catalog.chapters) {
 
 const catalogSha256 = sha256(catalogBytes);
 const versionSource = `${catalogSha256}\n${chapters.map((chapter) => `${chapter.id}:${chapter.sha256}`).join('\n')}`;
-const contentVersion = sha256(Buffer.from(versionSource, 'utf8')).slice(0, 20);
+const mediaMap = new Map();
+async function addMedia(file, id = null) {
+  if (typeof file !== 'string' || !/^(?:data\/artwork\/\d{3}\.json|assets\/illustrations\/[\w-]+\.(?:webp|avif|png|jpe?g)|assets\/audio\/[\w-]+\.(?:mp3|ogg|wav|m4a))$/i.test(file)) throw new Error(`Invalid media path: ${file}`);
+  if (!mediaMap.has(file)) { const bytes=await readFile(resolve(projectRoot,file)); if(!bytes.length)throw new Error(`Empty media: ${file}`);mediaMap.set(file,{file,sha256:sha256(bytes),bytes:bytes.length,chapters:[]}); }
+  const item=mediaMap.get(file);if(id&&!item.chapters.includes(id))item.chapters.push(id);
+}
+for (const mood of ['cool','neutral','warm']) await addMedia(`assets/illustrations/frontispiece-${mood}.webp`);
+for (const ch of catalog.chapters) {
+  if (!ch.artwork) continue;
+  if(!/^data\/artwork\/\d{3}\.json$/.test(ch.artwork))throw new Error(`Invalid artwork sidecar: ${ch.artwork}`);
+  await addMedia(ch.artwork,ch.id);
+  const art=JSON.parse(await readFile(resolve(projectRoot,ch.artwork),'utf8'));
+  if(art.schemaVersion!==1||art.chapter!==ch.id||!Array.isArray(art.scenes))throw new Error(`Invalid artwork sidecar: ${ch.artwork}`);
+  for(const scene of [art.cover,...art.scenes].filter(Boolean)){
+    if(scene.image)await addMedia(scene.image,ch.id);
+    if(scene.audio)await addMedia(scene.audio.file,ch.id);
+  }
+}
+const media=[...mediaMap.values()].sort((a,b)=>a.file.localeCompare(b.file,'en'));
+const mediaSource=media.map(x=>`${x.file}:${x.sha256}:${x.bytes}:${x.chapters.join(',')}`).join('\n');
+const contentVersion = sha256(Buffer.from(versionSource+'\nmedia-v2\n'+mediaSource, 'utf8')).slice(0, 20);
 
 const manifest = {
-  schemaVersion: 1,
+  schemaVersion: 2,
   contentVersion,
   catalogSha256,
   chapterCount: chapters.length,
   totalBytes: chapters.reduce((sum, chapter) => sum + chapter.bytes, 0),
-  chapters
+  chapters,
+  mediaBytes: media.reduce((sum, item) => sum + item.bytes, 0),
+  media
 };
 
 await writeFile(manifestPath, `${JSON.stringify(manifest, null, 2)}\n`, 'utf8');

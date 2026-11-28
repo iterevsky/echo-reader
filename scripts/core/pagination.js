@@ -19,8 +19,18 @@ export function createPagination(viewport, article, text) {
     if (!rect) return 0;
     return Math.max(0, Math.floor((rect.left - article.getBoundingClientRect().left + 0.5) / stride));
   }
+  const artBlocks = () => [...article.querySelectorAll('.echo-art')].filter(e=>!e.classList.contains('is-missing')&&!e.classList.contains('echo-art--audio-only'));
+  function blockPage(el) { return Math.max(0,Math.floor((el.getBoundingClientRect().left-article.getBoundingClientRect().left+0.5)/stride)); }
+  function artAnchor(el) {
+    const list=paragraphs();
+    const preceding = [...list].reverse().find(p => p.compareDocumentPosition(el)&Node.DOCUMENT_POSITION_FOLLOWING);
+    const p=preceding||list[0];
+    return {version:2,artworkId:el.dataset.artId,paragraphIndex:Math.max(0,list.indexOf(p)),paragraphId:p?.getAttribute('data-echo-anchor')||null,textOffset:preceding?p.textContent.length:0,paragraphRatio:0,viewportOffset:24};
+  }
   function pageFor(anchor) {
-    if (!anchor || anchor.atStart) return 0;
+    if (!anchor) return 0;
+    const art=artBlocks().find(e=>e.dataset.artId===anchor.artworkId);
+    if(art) return blockPage(art);
     const p = locateParagraph(paragraphs(), anchor);
     if (!p) return 0;
     let offset = resolveReadingOffset(p.textContent, anchor);
@@ -62,11 +72,14 @@ export function createPagination(viewport, article, text) {
       const ns = nodes(p);
       if (ns.length) count = Math.max(count, charPage(ns.at(-1), ns.at(-1).length - 1) + 1);
     }
-    retained = atEnd ? null : anchor;
+    for (const e of article.querySelectorAll('.echo-art')) count=Math.max(count,blockPage(e)+1);
+    retained = atEnd ? null : (anchor?.artworkId && !artBlocks().some(e=>e.dataset.artId===anchor.artworkId) ? {...anchor,artworkId:null} : anchor);
     place(atEnd ? count - 1 : pageFor(anchor));
   }
   function capture() {
     if (retained) return retained;
+    const art=artBlocks().find(e=>blockPage(e)===page);
+    if (art) return artAnchor(art);
     const list = paragraphs();
     for (let pi = 0; pi < list.length; pi++) {
       const p = list[pi]; let offset = 0;
@@ -78,7 +91,7 @@ export function createPagination(viewport, article, text) {
             if (charPage(node, mid) < page) lo = mid + 1; else hi = mid;
           }
           const textOffset = offset + lo;
-          return {version: 2, atStart: page === 0, paragraphIndex: pi,
+          return {version: 2, atStart: page === 0 && !artBlocks().length, paragraphIndex: pi,
             paragraphId: p.getAttribute('data-echo-anchor'), textOffset,
             quote: p.textContent.slice(Math.max(0, textOffset - 20), textOffset + 80),
             quoteOffset: Math.min(20, textOffset),
@@ -101,5 +114,5 @@ export function createPagination(viewport, article, text) {
     article.style.removeProperty('--page-gap');
     viewport.scrollLeft = 0;
   }
-  return {layout, capture, turn, disable, stop, atEnd: () => page === count - 1};
+  return {layout, capture, turn, disable, stop, atEnd: () => page === count - 1, currentPage:()=>page};
 }

@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <meta name="echo-build" content="echo-shell-2026-11-28-v8-reading">
+  <meta name="echo-build" content="echo-shell-2026-11-28-v13-rc1">
   <meta name="theme-color" content="#111111">
   <meta name="description" content="ЭХО. Интерактивное книжное издание.">
   <link rel="manifest" href="./manifest.webmanifest?v=6">
@@ -21,6 +21,8 @@
   <link rel="stylesheet" href="./styles/contents.css">
   <link rel="stylesheet" href="./styles/reader.css">
   <link rel="stylesheet" href="./styles/offline.css">
+  <link rel="stylesheet" href="./styles/settings.css">
+  <link rel="stylesheet" href="./styles/info.css">
 
   <script type="module" src="./scripts/core/app.js"></script>
 </head>
@@ -74,6 +76,12 @@
             <h1>Содержание</h1>
           </div>
 
+          <details class="edition-menu" data-edition-menu>
+            <summary>Об издании</summary>
+            <nav aria-label="Об издании"><button type="button" data-info-open="about">О произведении</button>
+            <button type="button" data-info-open="author">От автора</button>
+            <button type="button" data-info-open="feedback">Обратная связь</button><p class="edition-version">Версия приложения: 13 · <time datetime="2026-11-28">28.11.2026</time></p></nav>
+          </details>
           <div class="density-control" role="group" aria-label="Плотность списка">
             <button type="button" data-density="compact" aria-pressed="false">Компактно</button>
             <button type="button" data-density="normal" aria-pressed="true">Обычно</button>
@@ -86,11 +94,63 @@
         <div class="contents-scroll" id="contents-scroll" tabindex="0">
           <div class="contents-loading" data-contents-loading>Загружаем содержание…</div>
           <ol class="chapter-list" id="chapter-list"></ol>
+          <footer class="edition-footer"><nav aria-label="Сведения и связь"><button type="button" data-info-open="about">О произведении</button>
+            <button type="button" data-info-open="author">От автора</button>
+            <button type="button" data-info-open="feedback">Обратная связь</button></nav><p class="edition-version">Версия приложения: 13 · <time datetime="2026-11-28">28.11.2026</time></p></footer>
         </div>
         <button type="button" class="install-link" data-install hidden><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><rect x="6" y="2.5" width="12" height="19" rx="3"/><path d="M12 6v9m-3-3 3 3 3-3M10 18h4" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Установить приложение</span><span class="install-arrow" aria-hidden="true">›</span></button>
         <p class="offline-status" data-offline-status role="status" aria-live="polite" hidden></p>
       </div>
     </section>
+
+<section class="info-screen" id="info-screen" aria-hidden="true" inert hidden>
+<div class="info-toolbar"><button type="button" data-info-back>‹ Оглавление</button></div>
+<div class="info-scroll" id="info-scroll"><article class="info-article info-literary" data-info-page="about" hidden aria-labelledby="info-about-title"><header class="info-heading"><p class="info-eyebrow">ЭХО</p><h1 id="info-about-title" tabindex="-1">О произведении</h1></header><div class="info-prose"><p>Удивительно, какие вещи иногда остаются в памяти.</p>
+<p>Можно совершенно забыть, о чём разговаривал с человеком, но спустя много лет отчётливо помнить, как в тот момент солнце светило в комнату.</p>
+<p>Помнить звук лифта в доме, в котором давно не был. Расположение книг на чужой полке. Запах воздуха на весенней улице.</p>
+<p>И вроде совершенно бесполезная информация.</p>
+<p>Но стоит однажды услышать знакомый звук или почувствовать тот самый запах, как на несколько мгновений возвращается не только воспоминание, но и само ощущение жизни в том времени.</p>
+<p>Да и воспоминание ли это?</p>
+<p>Ведь порой такое же чувство возникает в местах, в которых прежде никогда не бывал.</p>
+<p>Странная всё-таки вещь, время.</p>
+<p>А это было в Волгограде в 2007 году.</p>
+</div><div class="info-end"><button type="button" data-info-back>К оглавлению</button></div></article><article class="info-article info-literary" data-info-page="author" hidden aria-labelledby="info-author-title"><header class="info-heading"><p class="info-eyebrow">ЭХО</p><h1 id="info-author-title" tabindex="-1">От автора</h1></header><div class="info-prose"><p>Много лет я хотел написать книгу, перебирал идеи, начинал, бросал. А потом в один момент проснулся и понял: вот оно, точно. Я понял, о чём напишу.</p>
+<p>Поверили?</p>
+<p>На самом деле первоначальный замысел отличается от нынешнего процентов на девяносто пять.</p>
+<p>Я всегда считал, что хорошее произведение отличается от посредственного тем, что сюжет в нём существует сразу на нескольких смысловых уровнях. В процессе написания я несколько раз менял сюжет, даже мысленно разбил произведение на два тома, написал крайне посредственный первый, а потом мне приснился сон, в котором я ел кислую капусту.</p>
+<p>Проснулся и понял, что нужно всё переписывать.</p>
+<p>В мире, где огромное количество сюжетов строится вокруг истории о Джонни, который смог, довольно мало историй рассказывают нам о том, что видели мы сами.</p>
+<p>Не Нью-Йорк, не Париж и даже не Москва. Обыкновенные города, улицы, дворы и дома, в которых мы жили. Они видели нашу жизнь, а мы видели жизнь людей вокруг.</p>
+<p>И рассказ об этом может быть чем-то гораздо большим, нежели просто рассказом о воспоминаниях.</p>
+<p>Почему 2007 год?</p>
+<p>Мир на пороге повсеместного интернета, доступности социальных сетей и будущих мессенджеров. Уже достаточно массово распространены телефоны с камерами. Уже существует почти современный мир.</p>
+<p>Прошло всего двадцать лет, а ведь он был совершенно другим.</p>
+<p>Ошибкой многих людей, которые знают меня лично, было бы считать это произведение автобиографическим. Безусловно, глупо писать о том, чего не знаешь. Но писать именно о себе? Для этого у меня есть Цеттель.</p>
+<p>Мне было важно не рассказать альтернативную историю, в которой я главный герой, а рассказать о чём-то важном.</p>
+<p>Удивительным образом, когда окончательно сложились персонажи, я перестал помещать их в придуманные события. События стали возникать на основе самих персонажей. И процесс написания стал интересен мне ещё и потому, что далеко не всегда я сам знал, к чему он приведёт.</p>
+<p>Первую версию произведения я направлял в издательства.</p>
+<p>К счастью, мне отказали.</p>
+<p>Тогда и появилась идея сделать книгу общедоступной. Писать её практически в прямом эфире. Хотя бы для того, чтобы в очередной раз не бросить.</p>
+<p>А уже в процессе написания я задумался: если это не бумага, то зачем ограничиваться возможностями бумаги?</p>
+<p>Так появились иллюстрации, художественные эффекты, идея звукового сопровождения и, в конечном счёте, собственное электронное издание. Впрочем, если вам хочется просто читать книгу, такая возможность тоже есть.</p>
+<p>Я не хотел бы, чтобы все люди, прочитавшие это произведение, испытали одни и те же эмоции. Грусть или радость.</p>
+<p>Намного лучше будет, если в каждом эта книга пробудит что-то своё. Что-то, что, казалось, было совсем давно.</p>
+<p>А было ли вообще?</p>
+<p>Это уже отдельный вопрос.</p>
+</div><div class="info-end"><button type="button" data-info-back>К оглавлению</button></div></article><article class="info-article info-feedback" data-info-page="feedback" hidden aria-labelledby="info-feedback-title">
+<header class="info-heading"><p class="info-eyebrow">ЭХО</p><h1 id="info-feedback-title" tabindex="-1">Обратная связь</h1></header>
+<p>Вы можете сообщить об опечатке, технической ошибке или просто написать автору.</p>
+<form data-feedback-form>
+<label for="feedback-type">Тип обращения</label><select id="feedback-type" name="type"><option value="typo">Опечатка</option><option value="technical">Техническая ошибка</option><option value="message">Сообщение автору</option></select>
+<label for="feedback-chapter">Глава (необязательно)</label><input id="feedback-chapter" name="chapter" type="number" min="1" step="1" inputmode="numeric" placeholder="Номер главы">
+<button type="button" data-feedback-current hidden>Указать текущую главу</button>
+<label for="feedback-message">Ваше сообщение</label><textarea id="feedback-message" name="message" rows="5" maxlength="2500" placeholder="Опишите, что заметили, или напишите автору"></textarea>
+<div data-feedback-technical hidden><label for="feedback-environment">Устройство и браузер (необязательно)</label><input id="feedback-environment" name="environment" maxlength="160" placeholder="Например, Android, Telegram"></div>
+<label for="feedback-preview">Предварительный просмотр</label><textarea id="feedback-preview" readonly rows="6"></textarea>
+<p class="info-note">Сообщение не отправляется автоматически. Можно скопировать его и вставить в чат Telegram. При переходе с черновиком его текст передаётся Telegram; отправку подтверждаете вы.</p>
+<div class="feedback-actions"><button type="button" data-feedback-copy>Скопировать</button><a data-feedback-telegram href="https://t.me/iterevsky_kochetov" target="_blank" rel="noopener noreferrer">Открыть Telegram</a></div>
+<p class="info-note" data-feedback-status role="status" aria-live="polite"></p>
+</form><p class="edition-version">Версия приложения: 13 · <time datetime="2026-11-28">28.11.2026</time></p></article></div></section>
 
     <!-- Экран чтения: первая рабочая версия -->
     <section
@@ -130,7 +190,7 @@
         <h2 data-transition-title></h2>
       </div>
 
-      <div class="reader-settings-backdrop" data-settings-backdrop aria-hidden="true">
+      <div class="reader-settings-backdrop" data-settings-backdrop aria-hidden="true" inert>
         <section class="reader-settings" role="dialog" aria-modal="true" aria-labelledby="reader-settings-title">
           <header class="reader-settings__header">
             <div>
@@ -141,22 +201,10 @@
           </header>
 
           <div class="reader-settings__body">
-            <label class="reader-setting" for="setting-reading-mode">
-              <span class="reader-setting__top"><span>Способ чтения</span></span>
-              <select id="setting-reading-mode" data-reading-mode>
-                <option value="scroll">Вертикальная прокрутка</option>
-                <option value="pages">Перелистывание страниц</option>
-              </select>
+<nav class="settings-tabs" aria-label="Разделы настроек"><button type="button" data-settings-tab="appearance" aria-pressed="true" aria-controls="settings-appearance">Оформление</button><button type="button" data-settings-tab="reading" aria-pressed="false" aria-controls="settings-reading">Чтение</button><button type="button" data-settings-tab="art" aria-pressed="false" aria-controls="settings-art">Художественные эффекты</button><button type="button" data-settings-tab="downloads" aria-pressed="false" aria-controls="settings-downloads">Загрузки</button></nav>
+<section id="settings-appearance" data-settings-panel="appearance" aria-label="Оформление">            <label class="reader-setting">Цветовая тема
+              <select data-art-setting="theme"><option value="dark">Тёмная</option><option value="light">Светлая</option></select>
             </label>
-            <label class="reader-setting" for="setting-page-animation">
-              <span class="reader-setting__top"><span>Анимация перелистывания</span></span>
-              <select id="setting-page-animation" data-page-animation>
-                <option value="slide">Горизонтальное скольжение</option>
-                <option value="fade">Плавное растворение</option>
-                <option value="none">Без анимации</option>
-              </select>
-            </label>
-
             <label class="reader-setting" for="setting-font-size">
               <span class="reader-setting__top"><span>Размер шрифта</span><output data-setting-value="fontSize">19</output></span>
               <input id="setting-font-size" type="range" min="16" max="30" step="1" data-setting="fontSize">
@@ -189,6 +237,42 @@
                 <button type="button" data-alignment="justify" aria-pressed="false">По ширине</button>
               </div>
             </fieldset>
+</section>
+<section id="settings-reading" data-settings-panel="reading" hidden aria-label="Чтение">            <label class="reader-setting" for="setting-reading-mode">
+              <span class="reader-setting__top"><span>Способ чтения</span></span>
+              <select id="setting-reading-mode" data-reading-mode>
+                <option value="scroll">Вертикальная прокрутка</option>
+                <option value="pages">Перелистывание страниц</option>
+              </select>
+            </label>
+            <label class="reader-setting" for="setting-page-animation">
+              <span class="reader-setting__top"><span>Анимация перелистывания</span></span>
+              <select id="setting-page-animation" data-page-animation>
+                <option value="slide">Горизонтальное скольжение</option>
+                <option value="fade">Плавное растворение</option>
+                <option value="none">Без анимации</option>
+              </select>
+            </label>
+
+            <label class="reader-setting">Повторное открытие главы
+              <select data-art-setting="reopen"><option value="position">Сразу продолжить чтение</option><option value="cover">Сначала вступительный кадр</option></select>
+            </label>
+            <p class="settings-help">Запоминается только текущая глава и место чтения.</p>
+            <button type="button" class="settings-action settings-danger" data-progress-reset>Сбросить прогресс чтения</button>
+            <p class="settings-help">Место чтения и отметки прочитанных глав удаляются. Настройки сохраняются.</p>
+</section>
+<section id="settings-art" data-settings-panel="art" hidden aria-label="Художественные эффекты">            <label class="reader-setting">Художественное издание
+              <select data-art-setting="edition"><option value="author">Авторское издание</option><option value="classic">Классическое издание</option><option value="custom">Индивидуальное издание</option></select>
+            </label>
+            <p class="settings-help" data-edition-description></p>
+            <label class="reader-setting" data-custom-art><span>Иллюстрации</span><input type="checkbox" data-art-setting="illustrations"></label>
+            <label class="reader-setting" data-custom-art><span>Художественное движение</span><input type="checkbox" data-art-setting="artMotion"></label>
+            <label class="reader-setting" data-custom-art><span>Звуковое сопровождение в индивидуальном издании</span><input type="checkbox" data-art-setting="artSound"></label>
+            <label class="reader-setting" data-sound-option><span>Разрешить звук</span><input type="checkbox" data-art-setting="audioConsent"></label>
+            <label class="reader-setting" data-sound-option><span>Автоматические звуковые эффекты</span><input type="checkbox" data-art-setting="audioAuto"></label>
+            <label class="reader-setting" data-sound-option><span>Громкость <output data-volume-label>65%</output></span><input type="range" min="0" max="100" step="5" data-art-setting="audioVolume"></label>
+</section>
+<section id="settings-downloads" data-settings-panel="downloads" hidden aria-label="Загрузки"><p class="settings-help">Текст книги подготавливается для чтения без сети автоматически.</p><p class="settings-download-status" data-download-status role="status">Состояние загрузки пока неизвестно.</p><button type="button" class="settings-action" data-download-check>Проверить обновления и текст</button><p class="settings-help" data-download-volume></p><button type="button" class="settings-action" data-download-all>Загрузить всё издание</button><p class="settings-help">Текст загружается автоматически, художественные файлы — по мере чтения. Полная загрузка включает все опубликованные иллюстрации и звук. Новые версии текста применяются при повторном открытии приложения.</p></section>
           </div>
 
           <footer class="reader-settings__footer">
@@ -199,6 +283,17 @@
       </div>
     </section>
   </main>
+  <dialog class="echo-resume-cover" data-resume-cover aria-label="Продолжить чтение">
+    <img data-resume-image alt="" draggable="false">
+    <h2 data-resume-number></h2>
+    <button type="button" data-resume-continue>Продолжить чтение</button>
+  </dialog>
+  <dialog class="echo-audio-consent" data-audio-consent aria-labelledby="echo-audio-title">
+    <h2 id="echo-audio-title">Услышать «ЭХО»</h2>
+    <p>В некоторых сценах могут звучать предметные и атмосферные звуки. Изменить выбор можно в настройках.</p>
+    <button type="button" data-audio-choice="yes">Включить звук</button>
+    <button type="button" data-audio-choice="no">Читать без звука</button>
+  </dialog>
   <dialog class="install-dialog" data-install-dialog aria-labelledby="install-title">
     <div class="install-dialog-header"><img src="./assets/icons/apple-touch-v6.png" width="48" height="48" alt=""><div><p class="install-kicker">ЭХО</p><h2 id="install-title">Книга всегда рядом</h2></div></div>
     <p data-install-help></p>

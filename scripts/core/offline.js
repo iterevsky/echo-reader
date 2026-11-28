@@ -1,491 +1,160 @@
-const PROJECT_ROOT = new URL('../../', import.meta.url);
-const CATALOG_PATH = 'data/chapters.json';
-const MANIFEST_PATH = 'data/chapters-manifest.json';
-const META_CACHE = 'echo-meta-v1';
-const BOOTSTRAP_CACHE = 'echo-content-bootstrap-v1';
-const CONTENT_CACHE_PREFIX = 'echo-content-';
-const ACTIVE_MARKER = new URL('__echo__/active-content.json', PROJECT_ROOT).href;
-const PENDING_MARKER = new URL('__echo__/pending-content.json', PROJECT_ROOT).href;
-const DOWNLOAD_CONCURRENCY = 2;
-
-let managerRunning = false;
-let latestRun = null;
-let onlineListenerAttached = false;
-let lastChapters = [];
-let lastStatusNode = null;
-
-function projectUrl(path) {
-  return new URL(path, PROJECT_ROOT).href;
+// Verified edition snapshots. A reading session pins a single immutable manifest.
+const ROOT = new URL('../../', import.meta.url);
+const scoped = encodeURIComponent(ROOT.pathname);
+const META = `echo-edition-meta-${scoped}`;
+const PREFIX = `echo-edition-${scoped}-`;
+const CATALOG = 'data/chapters.json', MANIFEST = 'data/chapters-manifest.json';
+const marker = name => new URL(`__echo__/edition-${name}.json`, ROOT).href;
+const url = path => new URL(path, ROOT).href;
+const versionOK = value => typeof value === 'string' && /^[a-f0-9]{20}$/.test(value);
+const pathOK = path => typeof path === 'string' && /^(?:data\/chapters\/\d{3}\.html|data\/artwork\/\d{3}\.json|assets\/illustrations\/[\w-]+\.(?:webp|avif|png|jpe?g)|assets\/audio\/[\w-]+\.(?:mp3|ogg|wav|m4a))$/i.test(path);
+const universal = ['cool','neutral','warm'].map(m => `assets/illustrations/frontispiece-${m}.webp`);
+let pinned = null, opening = null, running = null, pendingFull = false, lastStatus = null, installedListeners = false;
+let currentChapter = null, prefetched = null, fullRequested = false, revision = 0;
+const inflight = new Map();
+const available = () => !!globalThis.crypto?.subtle;
+let storageAvailable=true;
+const fail = message => { throw Error(message); };
+const mime = path => path.endsWith('.html') ? 'text/html; charset=utf-8' : path.endsWith('.json') ? 'application/json; charset=utf-8' : path.endsWith('.webp') ? 'image/webp' : path.endsWith('.avif') ? 'image/avif' : path.endsWith('.png') ? 'image/png' : /\.jpe?g$/i.test(path) ? 'image/jpeg' : path.endsWith('.mp3') ? 'audio/mpeg' : path.endsWith('.ogg') ? 'audio/ogg' : path.endsWith('.wav') ? 'audio/wav' : 'audio/mp4';
+export async function digest(bytes) { return [...new Uint8Array(await crypto.subtle.digest('SHA-256',bytes))].map(x=>x.toString(16).padStart(2,'0')).join(''); }
+const decode = bytes => JSON.parse(new TextDecoder().decode(bytes));
+const encode = value => new TextEncoder().encode(value);
+const response = (bytes,path) => new Response(bytes,{headers:{'Content-Type':mime(path)}});
+function status(message,state='info') { if(lastStatus){lastStatus.textContent=message;lastStatus.dataset.state=state;lastStatus.hidden=false;} }
+async function network(path, signal) {
+  const ctl = new AbortController();
+  const abort = () => ctl.abort();
+  if(signal?.aborted) abort(); else signal?.addEventListener('abort',abort,{once:true});
+  const timer = setTimeout(abort,20000);
+  try { const res = await fetch(url(path),{cache:'no-store',headers:{'X-Echo-Network-Only':'1'},signal:ctl.signal}); if(!res.ok) fail(`HTTP ${res.status}: ${path}`); return await res.arrayBuffer(); }
+  finally {clearTimeout(timer);signal?.removeEventListener('abort',abort);}
 }
-
-function setStatus(node, message, state = 'info') {
-  if (!node) return;
-  node.textContent = message;
-  node.dataset.state = state;
-  node.hidden = !message;
-}
-
-function bytesToHex(buffer) {
-  return [...new Uint8Array(buffer)]
-    .map((value) => value.toString(16).padStart(2, '0'))
-    .join('');
-}
-
-async function sha256(bytes) {
-  if (!globalThis.crypto?.subtle) {
-    throw new Error('Проверка целостности недоступна в этом браузере.');
+export async function validateSnapshot(catalogBytes,manifestBytes) {
+  const catalog=decode(catalogBytes), manifest=decode(manifestBytes);
+  if(catalog.version!==1 || !Array.isArray(catalog.chapters)||!catalog.chapters.length || ![1,2].includes(manifest.schemaVersion)||!versionOK(manifest.contentVersion)||!Array.isArray(manifest.chapters)||manifest.chapterCount!==catalog.chapters.length||manifest.chapters.length!==catalog.chapters.length) fail('Неверный формат комплекта книги.');
+  if(await digest(catalogBytes)!==manifest.catalogSha256) fail('Каталог не соответствует манифесту.');
+  const files=new Map(), ids=new Set(), numbers=new Set();
+  function add(item) {
+    if(!item||!pathOK(item.file)||files.has(item.file)||!Number.isSafeInteger(item.bytes)||item.bytes<=0||!/^[a-f0-9]{64}$/.test(item.sha256))fail('Неверная запись манифеста.');
+    files.set(item.file,item);
   }
-  return bytesToHex(await crypto.subtle.digest('SHA-256', bytes));
+  for(const item of manifest.chapters) {add(item);if(typeof item.id!=='string'||!Number.isInteger(item.number)||item.number<=0||ids.has(item.id)||numbers.has(item.number))fail('Повтор или неверный ID главы.');ids.add(item.id);numbers.add(item.number);}
+  for(const chapter of catalog.chapters){const item=files.get(chapter.file);if(!item||item.id!==chapter.id||item.number!==chapter.number||typeof chapter.title!=='string'||!/^data\/chapters\/\d{3}\.html$/.test(chapter.file))fail('Каталог и текст расходятся.'); if(chapter.artwork&&!/^data\/artwork\/\d{3}\.json$/.test(chapter.artwork))fail('Неверный путь художественной разметки.');}
+  if(new Set(catalog.chapters.map(c=>c.file)).size!==catalog.chapters.length)fail('Повтор файла главы.');
+  if(manifest.totalBytes!==manifest.chapters.reduce((a,x)=>a+x.bytes,0))fail('Неверный размер текста.');
+  const media=manifest.schemaVersion===2?manifest.media:[];
+  if(!Array.isArray(media))fail('Нет списка мультимедиа.');
+  for(const item of media){if(/^data\/chapters\//.test(item.file)||!Array.isArray(item.chapters)||item.chapters.some(id=>!ids.has(id)))fail('Неверная привязка мультимедиа.');add(item);}
+  if(manifest.schemaVersion===2){for(const p of universal)if(!files.has(p))fail('Нет общего фронтисписа.');for(const c of catalog.chapters)if(c.artwork&&!files.has(c.artwork))fail('Нет художественной разметки главы.');if(manifest.mediaBytes!==media.reduce((a,x)=>a+x.bytes,0))fail('Неверный размер мультимедиа.');}
+  const source=manifest.catalogSha256+'\n'+manifest.chapters.map(x=>`${x.id}:${x.sha256}`).join('\n')+(manifest.schemaVersion===2?'\nmedia-v2\n'+media.map(x=>`${x.file}:${x.sha256}:${x.bytes}:${x.chapters.join(',')}`).join('\n'):'');
+  if((await digest(encode(source))).slice(0,20)!==manifest.contentVersion)fail('Версия комплекта не соответствует контрольным суммам.');
+  return {catalog,manifest,catalogBytes,manifestBytes,files,media,version:manifest.contentVersion};
 }
-
-async function readJsonResponse(response, label) {
-  if (!response || !response.ok) {
-    throw new Error(`${label}: HTTP ${response?.status ?? 'нет ответа'}`);
-  }
-  const bytes = await response.arrayBuffer();
-  let data;
-  try {
-    data = JSON.parse(new TextDecoder('utf-8').decode(bytes));
-  } catch {
-    throw new Error(`${label}: повреждён JSON.`);
-  }
-  return { data, bytes };
-}
-
-function validateCatalog(catalog) {
-  if (!catalog || catalog.version !== 1 || !Array.isArray(catalog.chapters) || !catalog.chapters.length) {
-    throw new Error('Каталог глав имеет неизвестную или пустую структуру.');
-  }
-
-  const ids = new Set();
-  const numbers = new Set();
-
-  for (const chapter of catalog.chapters) {
-    if (
-      !chapter ||
-      typeof chapter.id !== 'string' ||
-      !Number.isInteger(chapter.number) ||
-      typeof chapter.title !== 'string' ||
-      typeof chapter.file !== 'string'
-    ) {
-      throw new Error('В каталоге обнаружена некорректная запись главы.');
-    }
-    if (ids.has(chapter.id) || numbers.has(chapter.number)) {
-      throw new Error('В каталоге обнаружены повторяющиеся ID или номера глав.');
-    }
-    if (!/^data\/chapters\/[0-9]{3}\.html$/.test(chapter.file)) {
-      throw new Error(`Недопустимый путь файла главы ${chapter.number}.`);
-    }
-    ids.add(chapter.id);
-    numbers.add(chapter.number);
-  }
-}
-
-async function validateSnapshot(catalogBytes, catalog, manifest) {
-  validateCatalog(catalog);
-
-  if (
-    !manifest ||
-    manifest.schemaVersion !== 1 ||
-    typeof manifest.contentVersion !== 'string' ||
-    !/^[a-f0-9]{20}$/.test(manifest.contentVersion) ||
-    !Array.isArray(manifest.chapters) ||
-    manifest.chapters.length !== catalog.chapters.length
-  ) {
-    throw new Error('Манифест контента имеет неверный формат.');
-  }
-
-  const catalogHash = await sha256(catalogBytes);
-  if (catalogHash !== manifest.catalogSha256) {
-    throw new Error('Контрольная сумма каталога не совпадает с манифестом.');
-  }
-
-  const manifestById = new Map();
-  for (const item of manifest.chapters) {
-    if (
-      !item ||
-      typeof item.id !== 'string' ||
-      !Number.isInteger(item.number) ||
-      typeof item.file !== 'string' ||
-      !/^[a-f0-9]{64}$/.test(item.sha256) ||
-      !Number.isInteger(item.bytes) || item.bytes < 0
-    ) {
-      throw new Error('В манифесте обнаружена некорректная запись файла.');
-    }
-    if (manifestById.has(item.id)) {
-      throw new Error('В манифесте обнаружен повторяющийся ID главы.');
-    }
-    manifestById.set(item.id, item);
-  }
-
-  for (const chapter of catalog.chapters) {
-    const item = manifestById.get(chapter.id);
-    if (!item || item.number !== chapter.number || item.file !== chapter.file) {
-      throw new Error(`Каталог и манифест расходятся на главе ${chapter.number}.`);
-    }
-  }
-
-  const totalBytes = manifest.chapters.reduce((sum, item) => sum + item.bytes, 0);
-  if (manifest.totalBytes !== totalBytes) {
-    throw new Error('Общий размер контента не совпадает с записями манифеста.');
-  }
-
-  const versionSource = `${manifest.catalogSha256}\n${manifest.chapters
-    .map((item) => `${item.id}:${item.sha256}`)
-    .join('\n')}`;
-  const expectedVersion = (await sha256(new TextEncoder().encode(versionSource))).slice(0, 20);
-  if (manifest.contentVersion !== expectedVersion) {
-    throw new Error('Идентификатор версии контента не совпадает с контрольными суммами.');
-  }
-}
-
-async function fetchSnapshot(networkOnly) {
-  const headers = networkOnly ? { 'X-Echo-Network-Only': '1' } : undefined;
-  const options = { cache: 'no-store' };
-  if (headers) options.headers = headers;
-
-  const [catalogResponse, manifestResponse] = await Promise.all([
-    fetch(projectUrl(CATALOG_PATH), options),
-    fetch(projectUrl(MANIFEST_PATH), options)
-  ]);
-
-  const catalogResult = await readJsonResponse(catalogResponse, 'Каталог глав');
-  const manifestResult = await readJsonResponse(manifestResponse, 'Манифест контента');
-  await validateSnapshot(catalogResult.bytes, catalogResult.data, manifestResult.data);
-
-  return {
-    catalog: catalogResult.data,
-    catalogBytes: catalogResult.bytes,
-    manifest: manifestResult.data,
-    manifestBytes: manifestResult.bytes
-  };
-}
-
-async function readSnapshotFromCache(cache) {
-  if (!cache) return null;
-  const [catalogResponse, manifestResponse] = await Promise.all([
-    cache.match(projectUrl(CATALOG_PATH)),
-    cache.match(projectUrl(MANIFEST_PATH))
-  ]);
-  if (!catalogResponse || !manifestResponse) return null;
-
-  try {
-    const catalogResult = await readJsonResponse(catalogResponse, 'Сохранённый каталог');
-    const manifestResult = await readJsonResponse(manifestResponse, 'Сохранённый манифест');
-    await validateSnapshot(catalogResult.bytes, catalogResult.data, manifestResult.data);
-    return {
-      catalog: catalogResult.data,
-      catalogBytes: catalogResult.bytes,
-      manifest: manifestResult.data,
-      manifestBytes: manifestResult.bytes
-    };
-  } catch (error) {
-    console.warn('ЭХО: сохранённая версия каталога повреждена.', error);
-    return null;
-  }
-}
-
-async function getMarker(url) {
-  const cache = await caches.open(META_CACHE);
-  const response = await cache.match(url);
-  if (!response) return null;
-  try {
-    return await response.json();
-  } catch {
-    return null;
-  }
-}
-
-async function setMarker(url, value) {
-  const cache = await caches.open(META_CACHE);
-  await cache.put(url, new Response(JSON.stringify(value), {
-    headers: { 'Content-Type': 'application/json; charset=utf-8' }
-  }));
-}
-
-async function deleteMarker(url) {
-  const cache = await caches.open(META_CACHE);
-  await cache.delete(url);
-}
-
-function contentCacheName(version) {
-  return `${CONTENT_CACHE_PREFIX}${version}`;
-}
-
-async function storeSnapshot(cache, snapshot) {
-  await Promise.all([
-    cache.put(projectUrl(CATALOG_PATH), new Response(snapshot.catalogBytes, {
-      headers: {
-        'Content-Type': 'application/json; charset=utf-8',
-        'X-Echo-SHA256': snapshot.manifest.catalogSha256
-      }
-    })),
-    cache.put(projectUrl(MANIFEST_PATH), new Response(snapshot.manifestBytes, {
-      headers: { 'Content-Type': 'application/json; charset=utf-8' }
-    }))
-  ]);
-}
-
-async function getVerifiedCachedBytes(cache, item) {
-  const response = await cache.match(projectUrl(item.file));
-  if (!response) return null;
-  const bytes = await response.arrayBuffer();
-  const hash = await sha256(bytes);
-  if (hash !== item.sha256 || bytes.byteLength !== item.bytes) return null;
-  return bytes;
-}
-
-async function storeChapter(cache, item, bytes) {
-  await cache.put(projectUrl(item.file), new Response(bytes, {
-    headers: {
-      'Content-Type': 'text/html; charset=utf-8',
-      'X-Echo-SHA256': item.sha256,
-      'X-Echo-Content-Version': item.number.toString()
-    }
-  }));
-}
-
-async function fetchChapterBytes(item) {
-  const response = await fetch(projectUrl(item.file), {
-    cache: 'no-store',
-    headers: { 'X-Echo-Network-Only': '1' }
-  });
-  if (!response.ok) {
-    throw new Error(`Глава ${item.number}: HTTP ${response.status}.`);
-  }
-  const bytes = await response.arrayBuffer();
-  if (bytes.byteLength !== item.bytes || await sha256(bytes) !== item.sha256) {
-    throw new Error(`Глава ${item.number}: контрольная сумма не совпала. Файл не установлен.`);
-  }
-  return bytes;
-}
-
-async function downloadSnapshot(snapshot, targetCache, sourceCache, sourceManifest, onProgress) {
-  await storeSnapshot(targetCache, snapshot);
-
-  const sourceById = new Map(
-    (sourceManifest?.chapters || []).map((item) => [item.id, item])
-  );
-
-  let completed = 0;
-  let nextIndex = 0;
-  let networkCount = 0;
-  let copiedCount = 0;
-  let cachedCount = 0;
-  let firstError = null;
-
-  async function worker() {
-    while (nextIndex < snapshot.manifest.chapters.length && !firstError) {
-      const item = snapshot.manifest.chapters[nextIndex++];
-
+async function readMarker(name){try{return await (await (await caches.open(META)).match(marker(name)))?.json();}catch{return null;}}
+async function writeMarker(name,value){await (await caches.open(META)).put(marker(name),new Response(JSON.stringify(value)));}
+async function removeMarker(name){await (await caches.open(META)).delete(marker(name));}
+async function remote(){const [c,m]=await Promise.all([network(CATALOG),network(MANIFEST)]);return validateSnapshot(c,m);}
+async function fromCache(cache){try{const [c,m]=await Promise.all([cache.match(url(CATALOG)),cache.match(url(MANIFEST))]);if(!c||!m)return null;return await validateSnapshot(await c.arrayBuffer(),await m.arrayBuffer());}catch{return null;}}
+async function openVersion(version){if(!versionOK(version))return null;try{const snap=await fromCache(await caches.open(PREFIX+version));return snap?.version===version?snap:null;}catch{return null;}}
+async function persistSnapshot(snap){const cache=await caches.open(PREFIX+snap.version);await cache.put(url(CATALOG),response(snap.catalogBytes,CATALOG));await cache.put(url(MANIFEST),response(snap.manifestBytes,MANIFEST));return cache;}
+async function checked(cache,item){try{const r=await cache.match(url(item.file));if(!r)return null;const b=await r.arrayBuffer();if(b.byteLength===item.bytes&&await digest(b)===item.sha256)return b;}catch{}return null;}
+async function completeText(snap){const cache=await caches.open(PREFIX+snap.version);for(const item of snap.manifest.chapters)if(!await checked(cache,item))return false;return true;}
+// Web Locks serialize marker changes where supported. Immutable versions also
+// keep open sessions isolated when the API is not present.
+const locked = task => globalThis.navigator?.locks?.request ? navigator.locks.request(META,task) : task();
+async function initialize(){
+  if(!available()) fail('Для проверенного издания нужен HTTPS или localhost.');
+  try{await caches.open(META);}catch{storageAvailable=false;return remote();}
+  return locked(async()=>{
+    const active=await readMarker('active'), pending=await readMarker('pending');
+    if(pending?.version){
       try {
-        let bytes = await getVerifiedCachedBytes(targetCache, item);
-        if (bytes) {
-          cachedCount += 1;
-        } else {
-          const previous = sourceById.get(item.id);
-          if (sourceCache && previous && previous.sha256 === item.sha256 && previous.file) {
-            const oldBytes = await getVerifiedCachedBytes(sourceCache, previous);
-            if (oldBytes) {
-              bytes = oldBytes;
-              copiedCount += 1;
-            }
-          }
-
-          if (!bytes) {
-            bytes = await fetchChapterBytes(item);
-            networkCount += 1;
-          }
-
-          await storeChapter(targetCache, item, bytes);
+        const candidate=await openVersion(pending.version);
+        if(candidate&&await completeText(candidate)){
+          await writeMarker('active',{version:candidate.version,previous:active?.version||null});
+          // A failed cleanup must not undo a successful activation.
+          await removeMarker('pending').catch(()=>{});
+          return candidate;
         }
-
-        completed += 1;
-        onProgress?.({ completed, total: snapshot.manifest.chapterCount, networkCount, copiedCount, cachedCount });
-      } catch (error) {
-        firstError = error;
-      }
+        await removeMarker('pending').catch(()=>{});
+      } catch(e) { console.warn('ЭХО: активация отложена; сохраняем прежнее издание.',e); }
     }
-  }
-
-  await Promise.all(
-    Array.from({ length: Math.min(DOWNLOAD_CONCURRENCY, snapshot.manifest.chapters.length) }, worker)
-  );
-
-  if (firstError) throw firstError;
-  return { completed, networkCount, copiedCount, cachedCount };
-}
-
-async function getActiveCache() {
-  const marker = await getMarker(ACTIVE_MARKER);
-  if (!marker?.version) return null;
-  return caches.open(contentCacheName(marker.version));
-}
-
-export async function activatePendingContentVersion() {
-  if (!('caches' in globalThis)) return null;
-
-  try {
-    const pending = await getMarker(PENDING_MARKER);
-    if (!pending?.version) return (await getMarker(ACTIVE_MARKER))?.version || null;
-
-    const cache = await caches.open(contentCacheName(pending.version));
-    const snapshot = await readSnapshotFromCache(cache);
-    if (!snapshot || snapshot.manifest.contentVersion !== pending.version) {
-      console.warn('ЭХО: отложенная версия контента не прошла проверку и не активирована.');
-      return (await getMarker(ACTIVE_MARKER))?.version || null;
+    const saved=await openVersion(active?.version);if(saved)return saved;
+    // Recover only a fully verified previous edition if the marker is damaged.
+    const previous=await openVersion(active?.previous);if(previous&&await completeText(previous)){await writeMarker('active',{version:previous.version}).catch(()=>{});return previous;}
+    let snap;
+    try{snap=await remote();}catch{
+      // Shell install stores a coherent catalog/manifest pair. Legacy caches
+      // are read only; never overwrite another version's catalog.
+      const keys=(await caches.keys()).filter(k=>k.startsWith('echo-shell-')).sort().reverse();
+      for(const key of keys){snap=await fromCache(await caches.open(key));if(snap)break;}
+      if(!snap)fail('Не удалось получить проверенный каталог. Подключитесь к интернету.');
     }
-
-    await setMarker(ACTIVE_MARKER, { version: pending.version, activatedAt: new Date().toISOString() });
-    await deleteMarker(PENDING_MARKER);
-    console.info(`ЭХО: активирована версия контента ${pending.version}.`);
-    return pending.version;
-  } catch (error) {
-    console.warn('ЭХО: не удалось активировать подготовленное обновление контента.', error);
-    return (await getMarker(ACTIVE_MARKER))?.version || null;
-  }
+    try{await persistSnapshot(snap);await writeMarker('active',{version:snap.version});}catch(e){storageAvailable=false;console.warn('ЭХО: сохранение издания недоступно; читаем из сети.',e);}return snap;
+  });
 }
-
-export async function registerServiceWorker() {
-  if (!('serviceWorker' in navigator) || !window.isSecureContext) return null;
-
-  try {
-    const swUrl = new URL('../../sw.js', import.meta.url);
-    const scope = new URL('../../', import.meta.url).pathname;
-    const registration = await navigator.serviceWorker.register(swUrl, {
-      scope,
-      updateViaCache: 'none'
-    });
-    registration.update().catch(() => {});
-    return registration;
-  } catch (error) {
-    console.warn('ЭХО: офлайн-режим Service Worker недоступен.', error);
-    return null;
-  }
+async function edition(){if(pinned)return pinned;if(!opening)opening=initialize().then(s=>pinned=s).finally(()=>{opening=null;});return opening;}
+// Kept for compatibility with the shell; initialization is deferred until catalog is needed.
+export async function activatePendingContentVersion(){return null;}
+export async function loadEditionCatalog(){return (await edition()).catalog;}
+async function getFile(snap,path,signal){
+  const item=snap.files.get(path);if(!item)fail('Файл отсутствует в проверенном манифесте: '+path);
+  const key=snap.version+':'+path;if(inflight.has(key))return inflight.get(key);
+  const task=(async()=>{
+    let cache=null,b=null;try{if(storageAvailable)cache=await caches.open(PREFIX+snap.version);}catch{storageAvailable=false;}if(cache){b=await checked(cache,item);if(b)return b;}
+    // Reuse verified bytes from previous versions, including the legacy PWA.
+    if(cache){try{const keys=(await caches.keys()).filter(k=>k!==PREFIX+snap.version&&(k.startsWith(PREFIX)||k.startsWith('echo-content-')||k.startsWith('echo-shell-')));
+    for(const name of keys){b=await checked(await caches.open(name),item);if(b)break;}}catch{}}
+    if(!b){b=await network(path,signal);if(b.byteLength!==item.bytes||await digest(b)!==item.sha256)fail('Файл не прошёл проверку целостности: '+path);}
+    // Reading can continue after quota failure, but the file must not be
+    // counted as downloaded until a subsequent verification succeeds.
+    try{if(cache)await cache.put(url(path),response(b,path));}catch(e){console.warn('ЭХО: файл не сохранён в кеше',e);}
+    return b;
+  })().finally(()=>inflight.delete(key));inflight.set(key,task);return task;
 }
-
-async function runOfflineManager(chapters, statusNode) {
-  if (!('caches' in globalThis) || !globalThis.crypto?.subtle) {
-    setStatus(statusNode, 'Офлайн-кэш недоступен в этом браузере.', 'warning');
-    return;
-  }
-
-  let activeMarker = await getMarker(ACTIVE_MARKER);
-  let activeCache = activeMarker?.version
-    ? await caches.open(contentCacheName(activeMarker.version))
-    : null;
-  let currentSnapshot = await readSnapshotFromCache(activeCache);
-
-  if (!currentSnapshot) {
-    try {
-      currentSnapshot = await fetchSnapshot(false);
-    } catch (error) {
-      setStatus(statusNode, 'Не удалось проверить комплект контента. Уже открытые главы остаются доступны.', 'warning');
-      console.warn('ЭХО: нет проверенного каталога для офлайн-кэша.', error);
-      return;
-    }
-  }
-
-  if (!activeMarker?.version) {
-    activeMarker = { version: currentSnapshot.manifest.contentVersion, activatedAt: new Date().toISOString() };
-    activeCache = await caches.open(contentCacheName(activeMarker.version));
-    await storeSnapshot(activeCache, currentSnapshot);
-    await setMarker(ACTIVE_MARKER, activeMarker);
-  }
-
-  let remoteSnapshot = null;
-  try {
-    remoteSnapshot = await fetchSnapshot(true);
-  } catch (error) {
-    console.info('ЭХО: свежая версия контента пока недоступна; используется сохранённая.', error);
-  }
-
-  if (remoteSnapshot && remoteSnapshot.manifest.contentVersion !== activeMarker.version) {
-    const pending = await getMarker(PENDING_MARKER);
-    if (pending?.version === remoteSnapshot.manifest.contentVersion) {
-      setStatus(statusNode, 'Обновление уже подготовлено. Оно применится при следующем запуске.', 'ready');
-      return;
-    }
-
-    setStatus(statusNode, 'Обнаружено обновление книги. Проверяем и загружаем изменённые главы…', 'info');
-    const stagingCache = await caches.open(contentCacheName(remoteSnapshot.manifest.contentVersion));
-    const result = await downloadSnapshot(
-      remoteSnapshot,
-      stagingCache,
-      activeCache,
-      currentSnapshot.manifest,
-      ({ completed, total, networkCount }) => {
-        setStatus(statusNode, `Подготовка обновления: ${completed} из ${total} глав · загружено из сети: ${networkCount}`, 'info');
-      }
-    );
-
-    await setMarker(PENDING_MARKER, {
-      version: remoteSnapshot.manifest.contentVersion,
-      preparedAt: new Date().toISOString()
-    });
-    setStatus(statusNode, `Обновление подготовлено (${result.networkCount} изменённых или новых файлов). Применится при следующем запуске.`, 'ready');
-    return;
-  }
-
-  const manifest = currentSnapshot.manifest;
-  const appChapterIds = new Set(chapters.map((chapter) => chapter.id));
-  if (appChapterIds.size !== manifest.chapters.length || manifest.chapters.some((item) => !appChapterIds.has(item.id))) {
-    console.warn('ЭХО: каталог активной версии отличается от списка глав текущего экрана.');
-  }
-
-  const persisted = await navigator.storage?.persist?.().catch(() => false);
-  if (persisted === false) {
-    console.info('ЭХО: браузер не подтвердил постоянное хранение, кэш всё равно используется.');
-  }
-
-  setStatus(statusNode, `Подготавливаем офлайн-доступ: 0 из ${manifest.chapterCount} глав`, 'info');
-  const result = await downloadSnapshot(
-    currentSnapshot,
-    activeCache,
-    null,
-    null,
-    ({ completed, total }) => {
-      setStatus(statusNode, `Подготавливаем офлайн-доступ: ${completed} из ${total} глав`, 'info');
-    }
-  );
-
-  if (result.completed === manifest.chapterCount) {
-    setStatus(statusNode, `Все ${manifest.chapterCount} глав доступны офлайн.`, 'ready');
-  }
+export async function fetchEditionFile(path,options={}){const snap=await edition();return response(await getFile(snap,path,options.signal),path);}
+export async function editionMediaUrl(path){const r=await fetchEditionFile(path);return URL.createObjectURL(await r.blob());}
+async function counts(snap,list){const cache=await caches.open(PREFIX+snap.version);let n=0,bytes=0;for(const item of list)if(await checked(cache,item)){n++;bytes+=item.bytes;}return {n,bytes};}
+async function download(snap,list,progress){let next=0,done=0,errors=[];async function worker(){while(next<list.length){const item=list[next++];try{await getFile(snap,item.file);}catch(e){errors.push(item.file);}progress?.(++done,list.length);}}await Promise.all([worker(),worker()]);return errors;}
+const mb = b => (b/1024/1024).toFixed(2).replace('.',',')+' МБ';
+async function shellReady(){
+  const controller=globalThis.navigator?.serviceWorker?.controller, build=globalThis.document?.querySelector?.('meta[name="echo-build"]')?.content;
+  if(!controller||!build)return false;
+  try{return await new Promise(resolve=>{const channel=new MessageChannel();const finish=value=>{clearTimeout(timer);channel.port1.close();resolve(value);};const timer=setTimeout(()=>finish(false),1000);channel.port1.onmessage=e=>finish(e.data?.build===build);try{controller.postMessage({type:'ECHO_GET_BUILD'},[channel.port2]);}catch{finish(false);}});}catch{return false;}
 }
-
-export function startOfflineManager(chapters, statusNode) {
-  lastChapters = Array.isArray(chapters) ? chapters : [];
-  lastStatusNode = statusNode;
-
-  const run = async () => {
-    if (managerRunning) return latestRun;
-    managerRunning = true;
-
-    latestRun = runOfflineManager(lastChapters, lastStatusNode)
-      .catch((error) => {
-        const message = /Failed to fetch|NetworkError|fetch/i.test(error.message)
-          ? 'Нет соединения. Продолжим загрузку, когда интернет появится.'
-          : `Офлайн-подготовка остановлена: ${error.message}`;
-        setStatus(lastStatusNode, message, 'warning');
-        console.warn('ЭХО: фоновая подготовка контента остановлена.', error);
-      })
-      .finally(() => {
-        managerRunning = false;
-      });
-
-    return latestRun;
-  };
-
-  if (!onlineListenerAttached) {
-    window.addEventListener('online', () => {
-      if (lastChapters.length) run();
-    });
-    window.addEventListener('offline', () => {
-      setStatus(lastStatusNode, 'Нет соединения. Ранее загруженные главы остаются доступны.', 'warning');
-    });
-    onlineListenerAttached = true;
-  }
-
-  return run();
+async function report(snap,extra=''){
+  const t=await counts(snap,snap.manifest.chapters), m=await counts(snap,snap.media);
+  const complete=t.n===snap.manifest.chapters.length&&m.n===snap.media.length;
+  const controlled=await shellReady();
+  status(`Текст: ${t.n}/${snap.manifest.chapters.length} глав. Медиа: ${m.n}/${snap.media.length} файлов (${mb(m.bytes)} из ${mb(snap.manifest.mediaBytes||0)}). ${complete?(controlled?'Комплект проверен и сохранён.':'Комплект сохранён; для запуска без сети нужен активный Service Worker.'):'Загруженные файлы проверены; комплект пока неполный.'}${extra?' '+extra:''}`,complete&&controlled?'ready':'info');
+  return {text:t,media:m,complete};
 }
+async function stageUpdate(snap){
+  let fresh;try{fresh=await remote();}catch{return 'Свежую версию проверить не удалось.';}
+  if(fresh.version===snap.version)return 'Новая версия не обнаружена.';
+  const active=await readMarker('active');if(active?.version===fresh.version)return 'Новая версия доступна после повторного открытия приложения.';
+  await persistSnapshot(fresh);
+  await download(fresh,fresh.manifest.chapters,(n,total)=>status(`Подготовка обновления: ${n}/${total} глав.`));
+  if(!await completeText(fresh))return 'Обновление не завершено; текущая версия сохранена.';
+  // A newer manifest can arrive while this one downloads. Only mark the version
+  // still published at the end of staging, never an obsolete partial snapshot.
+  return locked(async()=>{let latest;try{latest=await remote();}catch{return 'Обновление загружено, ожидается повторная проверка сети.';}if(latest.version!==fresh.version)return 'Появилась более новая версия; повторим проверку.';const current=await readMarker('active');if(current?.version!==fresh.version)await writeMarker('pending',{version:fresh.version});return 'Обновление текста подготовлено. Применится при следующем запуске.';});
+}
+function nearby(snap){const index=snap.catalog.chapters.findIndex(c=>c.id===currentChapter);const ids=new Set(snap.catalog.chapters.slice(Math.max(0,index-1),Math.max(0,index)+3).map(c=>c.id));return snap.media.filter(x=>universal.includes(x.file)||x.chapters.some(id=>ids.has(id)));}
+async function run(){
+  const snap=await edition();const full=pendingFull||fullRequested;pendingFull=false;
+  if(!storageAvailable){status('Браузер не разрешил сохранять файлы. Чтение из сети доступно; офлайн-комплект не подготовлен.','warning');return {complete:false};}
+  if(full)await navigator.storage?.persist?.().catch(()=>false);
+  await download(snap,snap.manifest.chapters,(n,total)=>status(`Проверка и загрузка текста: ${n}/${total} глав.`));
+  await download(snap,full?snap.media:nearby(snap),(n,total)=>status(`Загрузка художественных файлов: ${n}/${total}.`));
+  const extra=await stageUpdate(snap);return report(snap,extra);
+}
+export function startOfflineManager(chapters,node,options={}){
+  if(node)lastStatus=node;if(options.full){pendingFull=true;fullRequested=true;}
+  if(!installedListeners){installedListeners=true;navigator.serviceWorker?.addEventListener('controllerchange',()=>{if(pinned&&!running)report(pinned).catch(()=>{});});window.addEventListener('online',()=>startOfflineManager([],lastStatus));document.addEventListener('visibilitychange',()=>{if(!document.hidden)startOfflineManager([],lastStatus);});window.setInterval(()=>{if(!document.hidden&&navigator.onLine!==false)startOfflineManager([],lastStatus);},5*60*1000);}
+  if(running)return running.then(result=>pendingFull?startOfflineManager([],lastStatus):result);
+  running=run().catch(e=>{status('Офлайн-подготовка остановлена: '+e.message,'warning');return {error:e.message};}).finally(()=>{running=null;});return running;
+}
+export async function editionDownloadInfo(){const s=await edition();return {bytes:s.manifest.totalBytes+(s.manifest.mediaBytes||0),mediaBytes:s.manifest.mediaBytes||0,chapters:s.manifest.chapterCount,media:s.media.length};}
+export function prefetchEditionChapter(chapterId){if(currentChapter===chapterId)return;currentChapter=chapterId;const id=++revision;clearTimeout(prefetched);prefetched=setTimeout(async()=>{try{const s=await edition();if(id!==revision||!storageAvailable)return;await download(s,nearby(s));if(id===revision&&!running)await report(s);}catch{}},700);}
+export async function registerServiceWorker(){if(!('serviceWorker' in navigator)||!window.isSecureContext)return null;try{return await navigator.serviceWorker.register(new URL('../../sw.js',import.meta.url),{scope:ROOT.pathname,updateViaCache:'none'});}catch(e){console.warn('ЭХО: Service Worker недоступен.',e);return null;}}

@@ -1,0 +1,170 @@
+{
+  "build": "echo-shell-2026-11-28-v13-rc1",
+  "files": [
+    {
+      "file": "index.html",
+      "sha256": "dde165b0360e4ddb7ed0bee8af48b774f2e9651e8abee84043f3630d94e0edae",
+      "bytes": 26666
+    },
+    {
+      "file": "manifest.webmanifest",
+      "sha256": "4ac296f376a63736bb450fbc364c086874c7277721af133de7a18ff42a7a5d54",
+      "bytes": 884
+    },
+    {
+      "file": "styles/install.css",
+      "sha256": "bd69fd0b66ae5dc78da026be860cd728db12ee435c47682f8d7354305b44d3a8",
+      "bytes": 1538
+    },
+    {
+      "file": "scripts/core/install.js",
+      "sha256": "86a3f57cf24efd39c2044b1c51d6bdb574693c687282bd5e4e66741bf82de30f",
+      "bytes": 2466
+    },
+    {
+      "file": "assets/icons/favicon-v6.svg",
+      "sha256": "b59bc75e8568033b172cc4e807cfa4b4fe8d87528921989f9c1a7ff240484680",
+      "bytes": 1014
+    },
+    {
+      "file": "assets/icons/icon-v6-192.png",
+      "sha256": "b74851b196c11b4e63c92b11b5d5a207c91b165bfbdaeed0f53c5c4ab70f1363",
+      "bytes": 5049
+    },
+    {
+      "file": "assets/icons/icon-v6-512.png",
+      "sha256": "0cb9280594557b907fa1721dca44ecea51c455daf1459c671ae1e11b28768fab",
+      "bytes": 15090
+    },
+    {
+      "file": "assets/icons/icon-v6-maskable-512.png",
+      "sha256": "0cb9280594557b907fa1721dca44ecea51c455daf1459c671ae1e11b28768fab",
+      "bytes": 15090
+    },
+    {
+      "file": "assets/icons/icon-v6-maskable-192.png",
+      "sha256": "14c65893511e5eb7a79c87157a6999682513da84fd4bcb17a791dd9aa8dd79a3",
+      "bytes": 7671
+    },
+    {
+      "file": "assets/icons/apple-touch-v6.png",
+      "sha256": "372dd16e5e9400f77d282e371fbb9624960ac2e239c3cff70afbf23783190288",
+      "bytes": 4759
+    },
+    {
+      "file": "styles/base.css",
+      "sha256": "8d7f866dbed7bb78a03a85c78e23a13abecc97cfc7599ce47e6b44600f2ee133",
+      "bytes": 9239
+    },
+    {
+      "file": "styles/contents.css",
+      "sha256": "21ee500203b5faba9272e8b2a060ab53c6c6791f35d9096e2d6fa5f9f45ebbcd",
+      "bytes": 5663
+    },
+    {
+      "file": "styles/reader.css",
+      "sha256": "af4899a8d58d99a2f909448c6471140c8b56bb9afe3a78b07786c9b0f2fe6fae",
+      "bytes": 21435
+    },
+    {
+      "file": "styles/settings.css",
+      "sha256": "ff815b82a1f1879823b6d043bb6864572f7340223f717036591f961aba4fd7cb",
+      "bytes": 5118
+    },
+    {
+      "file": "styles/info.css",
+      "sha256": "2ae27f9c96988c81d18c681c100e733c3721c50d643f126ac6822955909cedd6",
+      "bytes": 4157
+    },
+    {
+      "file": "scripts/screens/info.js",
+      "sha256": "602db01743cc8621a941ff306c631adac7a555f944bb10ee9d06e5017c576d6e",
+      "bytes": 4068
+    },
+    {
+      "file": "styles/offline.css",
+      "sha256": "48806f78acd36dcd81fa7982515130e355fcbfb2fb6bb3333221de00e90e0f51",
+      "bytes": 530
+    },
+    {
+      "file": "scripts/core/app.js",
+      "sha256": "b34d1a9ae14cebab42760faa686cef9241c4bea84b271dbcdd08dac77118e4ea",
+      "bytes": 16394
+    },
+    {
+      "file": "scripts/core/storage.js",
+      "sha256": "cae26baf443fbf4a0d907f7067222aa97fe9a4c98123e935c76c32e46c2347f7",
+      "bytes": 7474
+    },
+    {
+      "file": "scripts/core/navigation.js",
+      "sha256": "457a6a6e4f4c749f73702a07f69314aa7a6fa9fcd13664ecf76fdceb6aa80abb",
+      "bytes": 1466
+    },
+    {
+      "file": "scripts/core/anchors.js",
+      "sha256": "f2bb53e6f18afacec5624e027253fed3e65b1b057b29c388daac2a47161a8acf",
+      "bytes": 2692
+    },
+    {
+      "file": "scripts/core/pagination.js",
+      "sha256": "6faf85bd1c65f27bfeece20c024fc0148673684dde20c7e4174cafb91ab53c11",
+      "bytes": 5760
+    },
+    {
+      "file": "scripts/core/artwork.js",
+      "sha256": "1171eacd83c7844d19ff519f6378dbd9f275a7b129176cd3bb2f279dff7320b0",
+      "bytes": 3129
+    },
+    {
+      "file": "scripts/core/artistic-engine.js",
+      "sha256": "9852499ead5c277581367df69ae34182ea4dcb901075dcfb3cd80d25cfd0809f",
+      "bytes": 13270
+    },
+    {
+      "file": "assets/illustrations/frontispiece-cool.webp",
+      "sha256": "b31557833491a7b6093e11a3b1f206048cbbeeb4c5610e313f7e5ddebf41d7ed",
+      "bytes": 163774
+    },
+    {
+      "file": "assets/illustrations/frontispiece-neutral.webp",
+      "sha256": "63b0c5ff36b42260071e990e720f0896cf5029d2bef5a8ef06ece660694053fb",
+      "bytes": 203082
+    },
+    {
+      "file": "assets/illustrations/frontispiece-warm.webp",
+      "sha256": "799ee394ae44b78a1e394204b927e5ccad0223bdf200c2b3db638dbc8e1f1307",
+      "bytes": 201058
+    },
+    {
+      "file": "scripts/core/offline.js",
+      "sha256": "0fa90b1b16cb01c052e28d35307832125ccf40f987e29abc0cfe7a00038348a1",
+      "bytes": 18142
+    },
+    {
+      "file": "scripts/screens/contents.js",
+      "sha256": "4c4689f10bd7157cff8a4466a99e7138c427dbeeba4e8699102e295a787ba26b",
+      "bytes": 7679
+    },
+    {
+      "file": "scripts/screens/reader.js",
+      "sha256": "d11b30aeebc385204f02afb4ccb1b47c8d3f6c9681495b343444d3fb425cfc5c",
+      "bytes": 36547
+    },
+    {
+      "file": "data/chapters.json",
+      "sha256": "66b1ed8cd25e857d1fb4c1236291688fe297a602f842b45b22c265dcc37e6e70",
+      "bytes": 17840
+    },
+    {
+      "file": "data/chapters-manifest.json",
+      "sha256": "a6c757f6ebfc0b6e286539a167f49eb47e9abd2d95f547b70d7be69f093cfcfa",
+      "bytes": 18464
+    },
+    {
+      "file": "assets/images/splash-original.png",
+      "sha256": "03a723f8d0a5f7dc9e2e07923d9d4c329d42738c061c743d80d6f86410187864",
+      "bytes": 2638504
+    }
+  ]
+}

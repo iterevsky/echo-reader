@@ -8,7 +8,8 @@ import {
 } from '../core/storage.js';
 
 import { assignParagraphIds, locateParagraph, migrateLegacyAnchor, resolveReadingOffset } from '../core/anchors.js';
-import { loadArtwork } from '../core/artwork.js';
+import { createArtisticEngine, getChapterArtwork } from '../core/artistic-engine.js';
+import { fetchEditionFile } from '../core/offline.js';
 import { createPagination } from '../core/pagination.js';
 
 const CONTROL_HIDE_DELAY = 3800;
@@ -16,7 +17,7 @@ const SAVE_DELAY = 280;
 const SWIPE_THRESHOLD = 78;
 const TRANSITION_DELAY = 430;
 
-export function createReaderScreen(root, { onBack, onCurrentChapterChanged, onSettingsOpen, onSettingsClose }) {
+export function createReaderScreen(root, { onBack, onCurrentChapterChanged, onSettingsOpen, onSettingsClose, onResetProgress, onCheckDownloads, onFullDownload, onDownloadInfo }) {
   const scrollArea = root.querySelector('#reader-scroll');
   const numberHeading = root.querySelector('#reader-chapter-number');
   const titleHeading = root.querySelector('#reader-chapter-title');
@@ -39,6 +40,43 @@ export function createReaderScreen(root, { onBack, onCurrentChapterChanged, onSe
   const pager = createPagination(scrollArea, root.querySelector('.reader-article'), textContainer);
   const paged = () => root.dataset.readingMode === 'pages';
   let suppressClickUntil = 0;
+  const artInputs=[...root.querySelectorAll('[data-art-setting]')];
+  const consent=document.querySelector('[data-audio-consent]');
+  let consentTimer=0;
+  const resumeDialog=document.querySelector('[data-resume-cover]');
+  const tabs=[...root.querySelectorAll('[data-settings-tab]')];
+  const panels=[...root.querySelectorAll('[data-settings-panel]')];
+  let showResumeCover=false;
+  const offlineSource=document.querySelector('[data-offline-status]');
+  const downloadStatus=root.querySelector('[data-download-status]');
+  const checkButton=root.querySelector('[data-download-check]');
+  const fullButton=root.querySelector('[data-download-all]');
+  const volumeInfo=root.querySelector('[data-download-volume]');
+  fullButton.addEventListener('click',async()=>{fullButton.disabled=true;try{await onFullDownload?.();syncDownloads();}catch{downloadStatus.textContent='Загрузка не завершена. Повторите позже.';}finally{fullButton.disabled=false;}});
+  const syncDownloads=()=>{downloadStatus.textContent=offlineSource?.textContent?.trim()||'Состояние загрузки пока неизвестно.';};
+  if(offlineSource)new MutationObserver(syncDownloads).observe(offlineSource,{childList:true,characterData:true,subtree:true,attributes:true});
+  function selectTab(key){
+    tabs.forEach(t=>t.setAttribute('aria-pressed',String(t.dataset.settingsTab===key)));
+    panels.forEach(p=>p.hidden=p.dataset.settingsPanel!==key);
+    root.querySelector('.reader-settings__body').scrollTop=0;
+    syncDownloads();
+    if(key==='downloads')onDownloadInfo?.().then(info=>{volumeInfo.textContent=`${info.chapters} глав · ${info.media} художественных файлов · ${(info.bytes/1024/1024).toFixed(2).replace('.',',')} МБ без оболочки приложения`;}).catch(()=>{});
+  }
+  tabs.forEach(t=>t.addEventListener('click',()=>selectTab(t.dataset.settingsTab)));
+  checkButton.addEventListener('click',async()=>{checkButton.disabled=true;downloadStatus.textContent='Проверяем…';try{await onCheckDownloads?.();syncDownloads();}catch{downloadStatus.textContent='Проверка не удалась. Повторите позже.';}finally{checkButton.disabled=false;}});
+  root.querySelector('[data-progress-reset]').addEventListener('click',()=>{if(window.confirm('Сбросить место чтения и отметки прочитанных глав? Настройки сохранятся.'))onResetProgress?.();});
+  function closeResume(){if(resumeDialog?.open)resumeDialog.close();artistic.setPaused(false);maybeConsent();}
+  resumeDialog?.querySelector('[data-resume-continue]').addEventListener('click',closeResume);
+  resumeDialog?.addEventListener('cancel',event=>{event.preventDefault();closeResume();});
+
+  const artistic=createArtisticEngine(root,scrollArea,root.querySelector('.reader-chapter-heading'),textContainer,mutate=>{
+    if(!currentChapter||restoringPosition){mutate();return;}
+    const anchor=captureReadingAnchor()||lastKnownAnchor;
+    mutate();
+    artistic.refreshDimensions();
+    if(paged()) pager.layout(anchor); else if(anchor) restoreReadingAnchor(anchor);
+    artistic.schedule();
+  });
 
   let chapters = [];
   let currentIndex = -1;
@@ -108,6 +146,7 @@ export function createReaderScreen(root, { onBack, onCurrentChapterChanged, onSe
     if (!currentChapter || !textContainer.children.length) return null;
     if (paged()) return pager.capture();
     if (settingsOpen && lastKnownAnchor) return lastKnownAnchor;
+    const artAnchor = artistic.capture(); if (artAnchor) return artAnchor;
 
     const paragraphs = getParagraphs();
     if (!paragraphs.length) return null;
@@ -197,10 +236,11 @@ export function createReaderScreen(root, { onBack, onCurrentChapterChanged, onSe
 
   function restoreReadingAnchor(anchor) {
     if (!anchor) return false;
-    if (paged()) { pager.layout(anchor); return true; }
+    if (paged()) { pager.layout(anchor); artistic.schedule(); return true; }
+    if (anchor.artworkId && artistic.restore(anchor)) return true;
 
     const paragraphs = getParagraphs();
-    if (anchor.atStart) { scrollArea.scrollTop = 0; return true; }
+    if (anchor.atStart && !root.querySelector('.echo-art--cover')) { scrollArea.scrollTop = 0; return true; }
     const paragraph = locateParagraph(paragraphs, anchor);
     if (!paragraph) return false;
 
@@ -272,9 +312,17 @@ export function createReaderScreen(root, { onBack, onCurrentChapterChanged, onSe
   }
 
   function applyReaderSettings(settings) {
+    document.documentElement.dataset.echoTheme=settings.theme;
     root.dataset.readingMode = settings.readingMode;
+    root.querySelector('[data-edition-description]').textContent={author:'Текст, иллюстрации и художественные эффекты. Звук только с разрешения.',classic:'Только текст, без художественных эффектов.',custom:'Выбери, какие элементы сопровождения оставить.'}[settings.edition];
+    root.querySelectorAll('[data-sound-option]').forEach(el=>el.hidden=settings.edition==='classic'||(settings.edition==='custom'&&!settings.artSound));
+    root.querySelector('[data-volume-label]').textContent=`${settings.audioVolume}%`;
+
     modeInput.value = settings.readingMode;
     animationInput.value = settings.pageAnimation;
+    for(const input of artInputs){const k=input.dataset.artSetting;if(input.type==='checkbox')input.checked=settings[k]===true;else input.value=String(settings[k]);}
+    root.querySelectorAll('[data-custom-art]').forEach(el=>el.hidden=settings.edition!=='custom');
+    artistic.configure(settings);
     root.style.setProperty('--reader-font-size', `${settings.fontSize}px`);
     root.style.setProperty('--reader-line-height', String(settings.lineHeight));
     root.style.setProperty('--reader-paragraph-spacing', `${settings.paragraphSpacing}em`);
@@ -315,7 +363,7 @@ export function createReaderScreen(root, { onBack, onCurrentChapterChanged, onSe
 
     if (controlsTimer !== null) window.clearTimeout(controlsTimer);
     controlsTimer = window.setTimeout(() => {
-      root.classList.remove('controls-visible');
+      if (!document.activeElement?.closest('.reader-toolbar,.reader-footer')) root.classList.remove('controls-visible');
       controlsTimer = null;
     }, CONTROL_HIDE_DELAY);
   }
@@ -333,23 +381,34 @@ export function createReaderScreen(root, { onBack, onCurrentChapterChanged, onSe
 
     if (!lastKnownAnchor || saveTimer !== null) savePosition();
     settingsOpen = true;
+    artistic.setPaused(true);
     root.classList.add('settings-preview');
     previousFocusedElement = document.activeElement;
     hideControls();
+    settingsBackdrop.inert=false;
+    scrollArea.inert=true;
+    root.querySelector('.reader-toolbar').inert=true;
+    root.querySelector('.reader-footer').inert=true;
+    selectTab('appearance');
     settingsBackdrop.classList.add('is-open');
     settingsBackdrop.setAttribute('aria-hidden', 'false');
     applyReaderSettings(getState().readerSettings);
 
-    const firstInput = settingInputs[0];
-    firstInput?.focus({ preventScroll: true });
+    tabs[0]?.focus({ preventScroll: true });
+    requestAnimationFrame(() => { if (settingsOpen && !settingsBackdrop.contains(document.activeElement)) tabs[0]?.focus({preventScroll:true}); });
   }
 
   function closeSettings() {
     if (!settingsOpen) return;
 
     settingsOpen = false;
+    artistic.setPaused(false);
     root.classList.remove('settings-preview');
     settingsBackdrop.classList.remove('is-open');
+    settingsBackdrop.inert=true;
+    scrollArea.inert=false;
+    root.querySelector('.reader-toolbar').inert=false;
+    root.querySelector('.reader-footer').inert=false;
     settingsBackdrop.setAttribute('aria-hidden', 'true');
     savePosition();
 
@@ -357,6 +416,7 @@ export function createReaderScreen(root, { onBack, onCurrentChapterChanged, onSe
       previousFocusedElement.focus({ preventScroll: true });
     }
     previousFocusedElement = null;
+    if(getState().readerSettings.audioConsent===null)maybeConsent();
   }
 
   function setChapters(items) {
@@ -383,7 +443,7 @@ export function createReaderScreen(root, { onBack, onCurrentChapterChanged, onSe
 
     let response;
     try {
-      response = await fetch(chapter.file, { cache: 'no-store' });
+      response = await fetchEditionFile(chapter.file);
     } catch (error) {
       throw new Error(`Не удалось получить главу ${chapter.number}: ${error.message}`);
     }
@@ -408,11 +468,8 @@ export function createReaderScreen(root, { onBack, onCurrentChapterChanged, onSe
     if (targetAnchor?.version !== 2) targetAnchor = targetPosition <= 1 ? null : migrateLegacyAnchor(targetAnchor, firstText, chapter.title);
     const paragraphs = assignParagraphIds(sourceArticle);
     if (!paragraphs.length) throw new Error('В главе отсутствует текст.');
-    // Optional metadata must never delay or prevent normal reading.
-    if (chapter.artwork) {
-      const ids = new Set(paragraphs.map(p => p.getAttribute('data-echo-anchor')));
-      loadArtwork(chapter, ids).catch(error => console.warn('ЭХО: художественная разметка недоступна.', error));
-    }
+    const metadata=await getChapterArtwork(chapter,paragraphs);
+    if(requestId!==chapterRequest)return false;
 
     const safeNodes = [...sourceArticle.childNodes]
       .filter((node) => {
@@ -428,11 +485,14 @@ export function createReaderScreen(root, { onBack, onCurrentChapterChanged, onSe
     currentIndex = index;
     currentChapter = chapter;
     lastKnownAnchor = targetAnchor;
+    showResumeCover=Boolean(mayRestore && targetAnchor && !targetAnchor.atStart && targetAnchor.artworkId!=='cover' && getState().readerSettings.reopen==='cover' && getState().readerSettings.edition!=='classic' && (getState().readerSettings.edition!=='custom'||getState().readerSettings.illustrations));
     updateNavigationButtons();
     numberHeading.textContent = `Глава ${chapter.number}`;
     titleHeading.textContent = '';
     titleHeading.hidden = true;
     textContainer.replaceChildren(...safeNodes);
+    artistic.setActive(false);
+    artistic.setChapter(chapter,metadata,getState().readerSettings);
 
     updateState({
       currentChapterId: chapter.id,
@@ -448,6 +508,7 @@ export function createReaderScreen(root, { onBack, onCurrentChapterChanged, onSe
 
     await new Promise(resolve => requestAnimationFrame(resolve));
     if (requestId !== chapterRequest) return false;
+    artistic.refreshDimensions();
     scrollArea.scrollTop = 0;
     await new Promise(resolve => requestAnimationFrame(resolve));
     if (requestId !== chapterRequest) return false;
@@ -461,6 +522,7 @@ export function createReaderScreen(root, { onBack, onCurrentChapterChanged, onSe
           scrollArea.scrollTop = targetPosition;
         }
 
+        artistic.setActive(true);
         lastKnownAnchor = captureReadingAnchor();
         restoringPosition = false;
         savePosition();
@@ -470,17 +532,53 @@ export function createReaderScreen(root, { onBack, onCurrentChapterChanged, onSe
     return true;
   }
 
+  function maybeConsent(){
+    clearTimeout(consentTimer);
+    const prefs=getState().readerSettings;
+    if(prefs.audioConsent!==null || prefs.edition==='classic' || (prefs.edition==='custom'&&!prefs.artSound) || !consent?.showModal)return;
+    consentTimer=setTimeout(()=>{
+      if(!root.classList.contains('is-active')||settingsOpen||consent.open||getState().readerSettings.audioConsent!==null)return;
+      artistic.setPaused(true); consent.showModal();
+    },2000);
+  }
+  function chooseAudio(value){
+    applyLiveSettings(()=>updateReaderSettings({audioConsent:value}));
+    consent?.close(); artistic.setPaused(false);
+  }
+  consent?.querySelectorAll('[data-audio-choice]').forEach(b=>b.addEventListener('click',()=>chooseAudio(b.dataset.audioChoice==='yes')));
+  consent?.addEventListener('cancel',event=>{event.preventDefault();chooseAudio(false);});
+
   function show() {
     root.inert = false;
     root.setAttribute('aria-hidden', 'false');
     root.classList.add('is-active');
+    artistic.setActive(true);
+    if(showResumeCover && resumeDialog?.showModal){
+      showResumeCover=false;
+      const image=root.querySelector('.echo-art--cover img');
+      const generation=chapterRequest, id=currentChapter.id;
+      const display=()=>{if(generation!==chapterRequest||currentChapter?.id!==id||!root.classList.contains('is-active')||settingsOpen||resumeDialog.open)return;
+        if(image?.naturalWidth>0){resumeDialog.querySelector('[data-resume-image]').src=image.currentSrc||image.src;resumeDialog.querySelector('[data-resume-number]').textContent=`Глава ${currentChapter.number}`;artistic.setPaused(true);resumeDialog.showModal();}else maybeConsent();};
+      if(image?.complete&&image.naturalWidth>0)display();else if(image){
+        // Do not open a delayed modal after the reader has started interacting.
+        let done=false;const cleanup=()=>{clearTimeout(timer);image.removeEventListener('load',finish);image.removeEventListener('error',cancel);root.removeEventListener('pointerdown',cancel,true);};
+        const cancel=()=>{if(done)return;done=true;cleanup();maybeConsent();};
+        const finish=()=>{if(done)return;done=true;cleanup();display();};
+        const timer=setTimeout(cancel,1800);image.addEventListener('load',finish);image.addEventListener('error',cancel);root.addEventListener('pointerdown',cancel,true);
+      }else maybeConsent();
+    }else maybeConsent();
+    if (!resumeDialog?.open && !consent?.open) scrollArea.focus({preventScroll:true});
     showControls();
   }
 
   function hide() {
     savePosition();
+    if(resumeDialog?.open)resumeDialog.close();
+    showResumeCover=false;
     closeSettings();
     cancelPending();
+    clearTimeout(consentTimer);if(consent?.open)consent.close();
+    artistic.setActive(false);artistic.setPaused(false);
     root.classList.remove('is-active', 'controls-visible');
     root.setAttribute('aria-hidden', 'true');
     root.inert = true;
@@ -505,6 +603,7 @@ export function createReaderScreen(root, { onBack, onCurrentChapterChanged, onSe
     const target = chapters[index];
     const generation = ++moveGeneration;
     isNavigating = true;
+    artistic.setPaused(true);
     previousButton.disabled = true;
     nextButton.disabled = true;
 
@@ -542,7 +641,7 @@ export function createReaderScreen(root, { onBack, onCurrentChapterChanged, onSe
       transitionLayer.classList.remove('is-visible');
       transitionLayer.setAttribute('aria-hidden', 'true');
     } finally {
-      if (generation === moveGeneration) { isNavigating = false; updateNavigationButtons(); }
+      if (generation === moveGeneration) { isNavigating = false; artistic.setPaused(false); updateNavigationButtons(); }
     }
   }
 
@@ -551,6 +650,7 @@ export function createReaderScreen(root, { onBack, onCurrentChapterChanged, onSe
     const wasPaged = paged();
     const updated = update();
     applyReaderSettings(updated.readerSettings);
+    artistic.refreshDimensions();
     if (paged()) pager.layout(anchor);
     else {
       if (wasPaged) pager.disable();
@@ -558,7 +658,7 @@ export function createReaderScreen(root, { onBack, onCurrentChapterChanged, onSe
       else scrollArea.scrollTop = 0;
     }
     lastKnownAnchor = captureReadingAnchor() || anchor;
-    savePosition();
+    savePosition();artistic.schedule();
   }
 
   function turnPage(delta) {
@@ -567,11 +667,13 @@ export function createReaderScreen(root, { onBack, onCurrentChapterChanged, onSe
     if (pager.turn(delta, getState().readerSettings.pageAnimation)) {
       savePosition();
       markReadAtEnd();
+      artistic.resetIdle();artistic.schedule();setTimeout(()=>artistic.schedule(),300);
     } else {
       moveTo(currentIndex + delta, delta > 0 ? 'next' : 'previous', delta < 0);
     }
   }
 
+  artInputs.forEach(input=>input.addEventListener('change',()=>applyLiveSettings(()=>updateReaderSettings({[input.dataset.artSetting]:input.type==='checkbox'?input.checked:input.type==='range'?Number(input.value):input.value}))));
   modeInput.addEventListener('change', () => applyLiveSettings(() => updateReaderSettings({readingMode: modeInput.value})));
   animationInput.addEventListener('change', () => applyLiveSettings(() => updateReaderSettings({pageAnimation: animationInput.value})));
 
@@ -598,7 +700,7 @@ export function createReaderScreen(root, { onBack, onCurrentChapterChanged, onSe
   });
 
   settingsResetButton.addEventListener('click', () => {
-    applyLiveSettings(resetReaderSettings);
+    if(window.confirm('Вернуть настройки к значениям по умолчанию? Место чтения сохранится.'))applyLiveSettings(resetReaderSettings);
   });
 
   settingInputs.forEach((input) => {
@@ -611,15 +713,33 @@ export function createReaderScreen(root, { onBack, onCurrentChapterChanged, onSe
     });
   });
 
-  root.addEventListener('keydown', (event) => {
+  root.addEventListener('focusin', event => {
+    if (!settingsOpen && event.target.closest('.reader-toolbar,.reader-footer')) showControls();
+  });
+  root.addEventListener('focusout', event => {
+    if (!settingsOpen && event.target.closest('.reader-toolbar,.reader-footer')) showControls();
+  });
+  document.addEventListener('keydown', (event) => {
+    if (!root.classList.contains('is-active') || consent?.open || resumeDialog?.open) return;
+    if (!settingsOpen && event.target === scrollArea && !event.altKey && !event.ctrlKey && !event.metaKey) {
+      if (paged() && ['ArrowLeft','ArrowRight','PageUp','PageDown'].includes(event.key)) {
+        event.preventDefault(); turnPage(['ArrowRight','PageDown'].includes(event.key)?1:-1); return;
+      }
+      if (event.key === 'Enter') { event.preventDefault(); showControls(); return; }
+    }
+    if(event.key==='Tab' && settingsOpen){
+      const items=[...settingsBackdrop.querySelectorAll('button,input,select')].filter(e=>!e.disabled&&e.getClientRects().length);
+      if(items.length && (event.shiftKey&&document.activeElement===items[0]||!event.shiftKey&&document.activeElement===items.at(-1))){event.preventDefault();(event.shiftKey?items.at(-1):items[0]).focus();}
+    }
     if (event.key === 'Escape' && settingsOpen) {
+      event.preventDefault();
       onSettingsClose?.();
     }
   });
 
   scrollArea.addEventListener('scroll', () => {
     if (paged() || restoringPosition || !root.classList.contains('is-active')) return;
-    if (!settingsOpen && root.classList.contains('controls-visible')) hideControls();
+    if (!settingsOpen && root.classList.contains('controls-visible') && !document.activeElement?.closest('.reader-toolbar,.reader-footer')) hideControls();
     if (saveTimer !== null) window.clearTimeout(saveTimer);
 
     saveTimer = window.setTimeout(() => {
@@ -702,7 +822,9 @@ export function createReaderScreen(root, { onBack, onCurrentChapterChanged, onSe
 
     resizeTimer = window.setTimeout(() => {
       if (anchor && currentChapter && !restoringPosition && root.classList.contains('is-active')) {
+        artistic.refreshDimensions();
         restoreReadingAnchor(anchor);
+        artistic.schedule();
         lastKnownAnchor = captureReadingAnchor() || anchor;
         savePosition();
       }
@@ -728,6 +850,7 @@ export function createReaderScreen(root, { onBack, onCurrentChapterChanged, onSe
     cancelPending,
     openSettings,
     closeSettings,
+    discardProgress: () => {hide();currentChapter=null;currentIndex=-1;lastKnownAnchor=null;updateNavigationButtons();},
     getCurrentChapter: () => currentChapter
   };
 }

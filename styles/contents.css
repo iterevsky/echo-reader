@@ -208,11 +208,11 @@
 }
 
 .chapter-entry.is-read {
-  color: #716b64;
+  color: #8f877e;
 }
 
 .chapter-entry.is-read .chapter-number {
-  color: #625c56;
+  color: #8f877e;
 }
 
 .chapter-entry.is-current {

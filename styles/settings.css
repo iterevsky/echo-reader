@@ -1,0 +1,42 @@
+/* Four settings categories. No changes to the authorial photographs. */
+.reader-settings__body [hidden] { display:none!important; }
+.settings-tabs { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:6px; padding:12px 0; position:sticky; top:0; background:#191715; z-index:1; }
+.settings-tabs button,.settings-action { min-height:44px; border:1px solid #74695b70; background:transparent; color:inherit; padding:10px; border-radius:4px; font:13px/1.35 Arial,sans-serif; cursor:pointer; }
+.settings-tabs button[aria-pressed="true"] { background:#b49b8022; border-color:#b49b80; color:#f2dfc8; }
+.reader-setting { font-size:14px; line-height:1.4; }
+.reader-setting select { margin-top:8px; min-height:44px; font-size:14px; }
+.reader-setting:has(input[type="checkbox"]) {display:flex;justify-content:space-between;align-items:center;gap:12px;min-height:44px;}
+.reader-setting input[type="checkbox"] {flex-shrink:0;}
+.reader-settings__close {min-width:44px;min-height:44px;}
+.settings-help,.settings-download-status {font:13px/1.55 Arial,sans-serif;color:#ada092;margin:10px 0 18px;}
+.settings-download-status {padding:12px;border:1px solid #74695b70;border-radius:4px;color:#d8cbbb;}
+.settings-action {width:100%;}
+.settings-action:disabled {opacity:.5;cursor:wait;}
+.settings-danger {color:#d4a49a;}
+.echo-resume-cover {position:fixed;inset:0;width:100%;height:100%;max-width:none;max-height:none;margin:0;border:0;padding:0;background:#171b1d;color:#f7f0e5;overflow:hidden;}
+.echo-resume-cover img {position:absolute;inset:0;width:100%;height:100%;object-fit:contain;}
+.echo-resume-cover h2 {position:absolute;top:23%;width:100%;text-align:center;margin:0;letter-spacing:.1em;font:400 clamp(24px,4vw,40px)/1.2 Georgia,serif;text-shadow:0 1px 8px #171615,0 0 18px #101316;}
+.echo-resume-cover button {position:absolute;bottom:max(32px,env(safe-area-inset-bottom));left:50%;transform:translateX(-50%);min-height:44px;max-width:90%;padding:12px 18px;border:1px solid #e6d8c8aa;border-radius:4px;background:#171513d9;color:#f7f0e5;cursor:pointer;}
+@media(max-width:400px){.reader-settings__header{padding:16px 18px 12px;gap:10px}.reader-settings__body{padding:0 18px 14px}.reader-settings__footer{padding:12px 18px}.reader-settings__header h2{font-size:23px}.settings-tabs button{font-size:12px}}
+:root[data-echo-theme="light"] {color-scheme:light;--color-background:#f3eee5;--color-text:#332c26;--color-muted:#6c6257;}
+[data-echo-theme="light"] :is(.reader-screen,.contents-screen){background:#f3eee5;color:#332c26;}
+[data-echo-theme="light"] :is(.reader-text,.reader-text em,.reader-text i,.reader-chapter-heading h1,.contents-heading h1){color:#392f28;}
+[data-echo-theme="light"] :is(.reader-chapter-number,.contents-eyebrow,.chapter-number,.reader-settings__eyebrow){color:#73675c;}
+[data-echo-theme="light"] :is(.chapter-entry,.density-control button,.range-button){color:#51463b;}
+[data-echo-theme="light"] .chapter-entry.is-read,[data-echo-theme="light"] .chapter-entry.is-read .chapter-number{color:#73695d;}
+[data-echo-theme="light"] :is(.chapter-entry.is-current,.density-control button[aria-pressed="true"],.range-button.is-active,.chapter-entry:hover){background:#dfd4c5;color:#493b2e;}
+[data-echo-theme="light"] .chapter-entry.is-current .chapter-number{color:#6e5139;}
+[data-echo-theme="light"] .reader-toolbar {background:linear-gradient(#f3eee5f7,#f3eee500);}
+[data-echo-theme="light"] .reader-footer {background:linear-gradient(0deg,#f3eee5,#f3eee5e8 62%,transparent);}
+[data-echo-theme="light"] :is(.reader-contents-button,.reader-settings-button,.reader-footer button){background:#eee6da;color:#493f35;border-color:#ad9e8c;}
+[data-echo-theme="light"] .reader-footer button:disabled{opacity:.45;}
+[data-echo-theme="light"] .reader-transition {background:#f3eee5fa;}
+[data-echo-theme="light"] :is(.reader-transition h2,.reader-transition__direction){color:#44382d;}
+[data-echo-theme="light"] :is(.reader-settings,.settings-tabs,.echo-audio-consent){background:#faf6ee;color:#382f27;border-color:#c9baa8;}
+[data-echo-theme="light"] :is(.reader-settings__header h2,.reader-settings__close,.reader-setting,.reader-setting legend,.reader-settings__reset,.reader-settings__done,.settings-download-status){color:#44392e;}
+[data-echo-theme="light"] :is(.reader-settings__header,.reader-settings__footer,.contents-ranges,.density-control,.reader-alignment-control button,.reader-setting select,.reader-settings__close,.reader-settings__reset,.reader-settings__done){border-color:#c9baa8;}
+[data-echo-theme="light"] :is(.reader-setting select,.reader-alignment-control button,.reader-settings__done,.echo-audio-consent button){background:#eae1d4;color:#44392e;}
+[data-echo-theme="light"] :is(.settings-help,.reader-setting output,.offline-status,.contents-loading){color:#66594b;}
+[data-echo-theme="light"] :is(.settings-tabs button[aria-pressed="true"],.reader-alignment-control button[aria-pressed="true"]){background:#ded0be;color:#493727;border-color:#a48c70;}
+[data-echo-theme="light"] .settings-danger{color:#97463b;}
+[data-echo-theme="light"] .install-link{color:#51463b;border-color:#c9baa8;}
